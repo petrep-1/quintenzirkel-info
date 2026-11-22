@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Stimmgerät</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/site.css">
+<style>
+/* VOICE: ruhig, präzise, wie ein gutes Clip-Stimmgerät am Notenpult
+   IDEA: die Zeigerskala eines klassischen Stimmgeräts
+   PICTURE: großer Halbkreis mit Zeiger und grüner Zone, darunter der Verlauf der letzten Sekunden
+   COLOUR and TYPE: gemeinsame Seitenfarben (Weiß/Tinte, Rot als Akzent), Grün nur für „stimmt“; Hanken Grotesk
+   LAYOUT: Skala links groß, Einstellungen und Referenzton rechts; unter 860px gestapelt */
+:root{--ok:light-dark(#1f8a4c,#5fd39a)}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "Hanken Grotesk",system-ui,sans-serif;overflow-x:clip}
+.band{padding:clamp(20px,3vw,44px) max(4vw,14px)}
+.wrap{max-width:1240px;margin:0 auto}
+h1{font-size:clamp(32px,4vw,46px);line-height:1.05;margin:0;font-weight:800;letter-spacing:-.02em}
+h2{font-size:21px;margin:0 0 12px;font-weight:800;letter-spacing:-.01em}
+.sub{color:var(--mute);margin:4px 0 0;max-width:62ch}
+header.band{padding-bottom:0}
+.tuner{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:clamp(20px,4vw,48px);align-items:start}
+@media(max-width:860px){.tuner{grid-template-columns:minmax(0,1fr)}}
+.dial{background:var(--soft);border-radius:16px;padding:14px 14px 18px;text-align:center}
+.dial svg{display:block;width:100%;height:auto}
+.read{display:flex;justify-content:center;align-items:baseline;gap:10px;margin-top:6px}
+.note{font-size:clamp(64px,12vw,112px);font-weight:800;line-height:1;letter-spacing:-.03em;transition:color .2s}
+.oct{font-size:22px;font-weight:600;color:var(--mute)}
+.dial.ok .note{color:var(--ok)}
+.meta{display:flex;justify-content:center;flex-wrap:wrap;gap:4px 18px;font-size:15px;color:var(--mute);margin-top:6px;font-variant-numeric:tabular-nums}
+.meta b{color:var(--ink);font-weight:600}
+.state{min-height:1.6em;margin:8px 0 0;font-weight:600}
+.dial.ok .state{color:var(--ok)}
+.hist{margin-top:14px}
+.btn{min-height:44px;padding:0 18px;border-radius:10px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);font:600 16px/1 "Hanken Grotesk",system-ui,sans-serif;cursor:pointer}
+.btn:hover{border-color:var(--ink)}
+.btn.pri{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.btn:focus-visible,select:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+.start{margin-top:14px;min-width:220px;min-height:52px;font-size:17px}
+.side{display:grid;gap:18px}
+.card{border:1px solid var(--line);border-radius:14px;padding:16px}
+label{display:block;font-size:14px;font-weight:600;color:var(--mute);margin-bottom:6px}
+select{width:100%;min-height:44px;font:inherit;font-size:16px;color:var(--ink);background:var(--bg);border:1.5px solid var(--line);border-radius:10px;padding:0 10px}
+.step{display:flex;align-items:center;gap:8px}
+.step .btn{width:44px;padding:0;font-size:20px}
+.step output{min-width:6.5em;text-align:center;font-weight:800;font-size:20px;font-variant-numeric:tabular-nums}
+.row2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
+.note-s{font-size:14px;color:var(--mute);margin:8px 0 0}
+.tips{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:16px 32px}
+.tips h3{margin:0 0 4px;font-size:17px}.tips p{margin:0;color:var(--mute);font-size:15px}
+@media(prefers-reduced-motion:reduce){.note{transition:none}}
+</style>
+</head>
+<body>
+<nav class="site-nav" aria-label="Seiten"><div class="in"><a class="brand" href="../">Musik-Helfer</a><div class="links"><a href="../">Quintenzirkel</a><a href="../transponieren/">Transponieren</a><a href="../posaune/">Posaune</a><a href="./" aria-current="page">Stimmgerät</a></div></div></nav>
+<header class="band"><div class="wrap">
+<h1>Stimmgerät</h1>
+<p class="sub">Chromatisches Stimmgerät über das Mikrofon, mit wählbarem Kammerton, Anzeige für B-, Es- und F-Instrumente und Referenzton zum Stimmen nach Gehör.</p>
+</div></header>
+
+<main class="band"><div class="wrap tuner">
+<div class="dial" id="dial" aria-live="polite">
+<svg id="gauge" viewBox="0 0 400 225" role="img" aria-label="Abweichung in Cent"></svg>
+<div class="read"><span class="note" id="note">–</span><span class="oct" id="oct"></span></div>
+<div class="meta"><span><b id="cents">±0</b> Cent</span><span><b id="hz">–</b> Hz</span><span>Ziel <b id="target">–</b> Hz</span></div>
+<p class="state" id="state">Tippe auf „Stimmgerät starten“ und spiele einen Ton.</p>
+<button class="btn pri start" id="start">🎤 Stimmgerät starten</button>
+<svg class="hist" id="hist" viewBox="0 0 400 70" aria-hidden="true"></svg>
+</div>
+
+<div class="side">
+<div class="card">
+<h2>Einstellungen</h2>
+<label>Kammerton a′</label>
+<div class="step"><button class="btn" id="aDn" aria-label="Kammerton tiefer">−</button><output id="aVal">442 Hz</output><button class="btn" id="aUp" aria-label="Kammerton höher">+</button></div>
+<p class="note-s">Viele Blasorchester stimmen auf 442 oder 443 Hz, Klavier meist 440 Hz.</p>
+<div style="margin-top:14px"><label for="trans">Notennamen anzeigen für</label>
+<select id="trans"><option value="0">Klingend (C): Posaune, Tuba, Flöte, Klavier</option><option value="2">B-Instrument: Trompete, Klarinette, Tenorhorn, Posaune im Violinschlüssel</option><option value="9">Es-Instrument: Altsax, Es-Horn</option><option value="7">F-Instrument: Waldhorn</option></select></div>
+<div style="margin-top:14px"><label for="sens">Empfindlichkeit</label>
+<select id="sens"><option value="0.004">Hoch (leise Instrumente)</option><option value="0.01" selected>Normal</option><option value="0.025">Niedrig (laute Umgebung)</option></select></div>
+</div>
+
+<div class="card">
+<h2>Referenzton</h2>
+<div class="row2">
+<div><label for="rNote">Ton (klingend)</label><select id="rNote"></select></div>
+<div><label for="rOct">Oktave</label><select id="rOct"><option value="2">groß (2)</option><option value="3" selected>klein (3)</option><option value="4">eingestrichen (4)</option><option value="5">zweigestrichen (5)</option></select></div>
+</div>
+<button class="btn" id="rPlay" style="margin-top:12px;width:100%">▶ Referenzton spielen</button>
+<p class="note-s" id="rInfo"></p>
+</div>
+</div>
+</div></main>
+
+<section class="band" style="padding-top:0"><div class="wrap">
+<h2>So stimmst du</h2>
+<div class="tips">
+<div><h3>Zeiger in die Mitte</h3><p>Grün heißt: höchstens 5 Cent daneben, das hört praktisch niemand. Lange, ruhige Töne in normaler Lautstärke geben die sicherste Anzeige.</p></div>
+<div><h3>Zu tief oder zu hoch</h3><p>Zeiger links: Ton zu tief, Stimmzug ein Stück einschieben. Zeiger rechts: zu hoch, Stimmzug herausziehen. Bei der Posaune ist das der Stimmzug am Schallstück, nicht der Hauptzug.</p></div>
+<div><h3>Erst warm spielen</h3><p>Kalte Blechblasinstrumente klingen tiefer. Ein paar Minuten einspielen, dann stimmen, sonst ist der Stimmzug später zu weit draußen.</p></div>
+<div><h3>Gemeinsam stimmen</h3><p>Im Verein meist auf das klingende B (Referenzton B, Oktave klein) oder das A. Danach lohnt der Vergleich nach Gehör mit dem Nachbarn.</p></div>
+</div>
+</div></section>
+
+<script>
+{
+const $=id=>document.getElementById(id);
+const NAMES=['C','Des','D','Es','E','F','Fis','G','As','A','B','H'];
+const ALT=['His','Cis','','Dis','Fes','Eis','Ges','','Gis','','Ais','Ces'];
+const store={get(k,d){try{const v=localStorage.getItem('tuner.'+k);return v===null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem('tuner.'+k,JSON.stringify(v))}catch(e){}}};
+let A=store.get('a',442);
+$('trans').value=store.get('trans','0');$('sens').value=store.get('sens','0.01');
+$('rNote').innerHTML=NAMES.map((n,i)=>`<option value="${i}">${n}</option>`).join('');
+$('rNote').value=store.get('rNote','10');$('rOct').value=store.get('rOct','3');
+
+/* gauge */
+const CX=200,CY=205,R=170,ang=c=>Math.max(-50,Math.min(50,c))*1.3*Math.PI/180;
+const pt=(c,r)=>[CX+r*Math.sin(ang(c)),CY-r*Math.cos(ang(c))];
+function arc(c1,c2,r){const [x1,y1]=pt(c1,r),[x2,y2]=pt(c2,r);return `M${x1.toFixed(1)} ${y1.toFixed(1)}A${r} ${r} 0 0 1 ${x2.toFixed(1)} ${y2.toFixed(1)}`}
+let g='';
+g+=`<path d="${arc(-50,50,R)}" fill="none" stroke="var(--line)" stroke-width="2"/>`;
+g+=`<path d="${arc(-5,5,R-12)}" fill="none" stroke="var(--ok)" stroke-width="18" opacity=".28"/>`;
+for(let c=-50;c<=50;c+=5){const L=c%25===0?22:c%10===0?14:8,[x1,y1]=pt(c,R),[x2,y2]=pt(c,R-L);
+  g+=`<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="var(--ink)" stroke-width="${c%25===0?2.2:1.2}" opacity="${c%25===0?.9:.5}"/>`;
+  if(c%25===0){const [tx,ty]=pt(c,R-40);g+=`<text x="${tx.toFixed(1)}" y="${(ty+5).toFixed(1)}" font-size="14" font-weight="600" text-anchor="middle" fill="var(--mute)">${c>0?'+'+c:c}</text>`}}
+g+=`<text x="34" y="218" font-size="14" font-weight="600" fill="var(--mute)">zu tief</text><text x="366" y="218" font-size="14" font-weight="600" fill="var(--mute)" text-anchor="end">zu hoch</text>`;
+g+=`<g id="needle" opacity=".35"><line x1="${CX}" y1="${CY}" x2="${CX}" y2="${CY-R+6}" stroke="var(--acc)" stroke-width="4" stroke-linecap="round"/><circle cx="${CX}" cy="${CY}" r="9" fill="var(--ink)"/></g>`;
+$('gauge').innerHTML=g;
+
+/* history */
+const H=[];const histDraw=()=>{let p='';H.forEach((c,i)=>{if(c===null)return;p+=`${(i*400/119).toFixed(1)},${(35-Math.max(-50,Math.min(50,c))*.6).toFixed(1)} `});
+  $('hist').innerHTML=`<rect x="0" y="${35-3}" width="400" height="6" fill="var(--ok)" opacity=".22"/><line x1="0" x2="400" y1="35" y2="35" stroke="var(--line)"/><polyline points="${p}" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`};
+histDraw();
+
+/* settings */
+const showA=()=>{$('aVal').textContent=A+' Hz';store.set('a',A);refInfo()};
+$('aDn').onclick=()=>{if(A>430){A--;showA();if(ref)refStart()}};
+$('aUp').onclick=()=>{if(A<450){A++;showA();if(ref)refStart()}};
+$('trans').onchange=()=>store.set('trans',$('trans').value);
+$('sens').onchange=()=>store.set('sens',$('sens').value);
+
+/* audio */
+let ac=null,an=null,stream=null,buf=null,run=false,ref=null,refG=null;
+const ctx=()=>{ac=ac||new (window.AudioContext||window.webkitAudioContext)();if(ac.state==='suspended')ac.resume();return ac};
+const refMidi=()=>12*(+$('rOct').value+1)+ +$('rNote').value;
+const refHz=()=>A*2**((refMidi()-69)/12);
+function refInfo(){const t=+$('trans').value,m=refMidi();$('rInfo').textContent=`${refHz().toFixed(1).replace('.',',')} Hz`+(t?` · für dein Instrument notiert: ${NAMES[(m+t)%12]}`:'')}
+function refStart(){refStop();const c=ctx(),o=c.createOscillator(),f=c.createBiquadFilter(),gn=c.createGain();
+  o.type='triangle';o.frequency.value=refHz();f.type='lowpass';f.frequency.value=2500;gn.gain.setValueAtTime(0,c.currentTime);gn.gain.linearRampToValueAtTime(.18,c.currentTime+.05);
+  o.connect(f).connect(gn).connect(c.destination);o.start();ref=o;refG=gn;$('rPlay').textContent='■ Referenzton stoppen'}
+function refStop(){if(ref){const t=ac.currentTime;refG.gain.cancelScheduledValues(t);refG.gain.setValueAtTime(refG.gain.value,t);refG.gain.linearRampToValueAtTime(0,t+.05);ref.stop(t+.06);ref=null}$('rPlay').textContent='▶ Referenzton spielen'}
+$('rPlay').onclick=()=>{try{ref?refStop():refStart()}catch(e){}};
+['rNote','rOct'].forEach(id=>$(id).onchange=()=>{store.set(id,$(id).value);refInfo();if(ref)refStart()});
+$('trans').addEventListener('change',refInfo);
+
+/* pitch detection (YIN) */
+let d,cm;
+function yin(x,sr){const W=x.length>>1,maxT=Math.min(W-1,Math.floor(sr/27)),minT=Math.floor(sr/1600);
+  if(!d||d.length<maxT+2){d=new Float32Array(maxT+2);cm=new Float32Array(maxT+2)}
+  for(let t=1;t<=maxT;t++){let s=0;for(let i=0;i<W;i++){const v=x[i]-x[i+t];s+=v*v}d[t]=s}
+  let run=0;cm[0]=1;for(let t=1;t<=maxT;t++){run+=d[t];cm[t]=run?d[t]*t/run:1}
+  let T=-1;for(let t=minT;t<maxT;t++){if(cm[t]<.12){while(t+1<maxT&&cm[t+1]<cm[t])t++;T=t;break}}
+  if(T<0){let b=minT;for(let t=minT;t<maxT;t++)if(cm[t]<cm[b])b=t;if(cm[b]>.3)return 0;T=b}
+  const a=cm[T-1]??cm[T],b=cm[T],c=cm[T+1]??cm[T],den=a-2*b+c,sh=den?(a-c)/(2*den):0;
+  return sr/(T+(Math.abs(sh)<1?sh:0))}
+
+let hist=[],shown=0,target=0,quiet=0,frame=0,lastNote=null;
+function setNeedle(c,active){const n=$('needle');n.setAttribute('transform',`rotate(${(Math.max(-50,Math.min(50,c))*1.3).toFixed(2)} ${CX} ${CY})`);n.setAttribute('opacity',active?1:.35)}
+function loop(){if(!run)return;requestAnimationFrame(loop);if(++frame%2)return;
+  an.getFloatTimeDomainData(buf);let rms=0;for(let i=0;i<buf.length;i++)rms+=buf[i]*buf[i];rms=Math.sqrt(rms/buf.length);
+  const f=rms>+$('sens').value?yin(buf,ac.sampleRate):0;
+  if(f>27&&f<1600){quiet=0;
+    if(hist.length&&Math.abs(12*Math.log2(f/hist[hist.length-1]))>.7)hist=[];
+    hist.push(f);if(hist.length>5)hist.shift();
+    const fm=[...hist].sort((a,b)=>a-b)[hist.length>>1],midi=69+12*Math.log2(fm/A),n=Math.round(midi),c=(midi-n)*100;
+    if(n!==lastNote){shown=c;lastNote=n}else shown+=(c-shown)*.35;
+    const t=+$('trans').value,w=n+t;
+    $('note').textContent=NAMES[((w%12)+12)%12];$('oct').textContent=t?'':String(Math.floor(n/12)-1);
+    $('cents').textContent=(shown>=0?'+':'−')+Math.abs(shown).toFixed(0);
+    $('hz').textContent=fm.toFixed(1).replace('.',',');$('target').textContent=(A*2**((n-69)/12)).toFixed(1).replace('.',',');
+    const ok=Math.abs(shown)<5;$('dial').classList.toggle('ok',ok);
+    $('state').textContent=ok?'Stimmt!':shown<0?'Zu tief: Stimmzug etwas einschieben':'Zu hoch: Stimmzug etwas herausziehen';
+    setNeedle(shown,true);H.push(shown)}
+  else{if(++quiet>12){setNeedle(0,false);$('dial').classList.remove('ok');$('state').textContent='Hört zu … spiele einen langen Ton.';hist=[];lastNote=null}H.push(null)}
+  if(H.length>120)H.shift();histDraw()}
+
+async function start(){
+  if(!navigator.mediaDevices?.getUserMedia){$('state').textContent='Mikrofon nicht verfügbar. Die Seite muss über https geöffnet sein.';return}
+  try{const c=ctx();stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}});
+    const src=c.createMediaStreamSource(stream);an=c.createAnalyser();an.fftSize=4096;src.connect(an);buf=new Float32Array(an.fftSize);
+    run=true;$('start').textContent='■ Stimmgerät stoppen';$('start').classList.remove('pri');$('state').textContent='Hört zu … spiele einen langen Ton.';loop()}
+  catch(e){$('state').textContent=e.name==='NotAllowedError'?'Mikrofonzugriff wurde abgelehnt. Bitte in den Browser-Einstellungen für diese Seite erlauben.':'Mikrofon konnte nicht gestartet werden.'}}
+function stop(){run=false;stream?.getTracks().forEach(t=>t.stop());stream=null;setNeedle(0,false);$('dial').classList.remove('ok');
+  $('start').textContent='🎤 Stimmgerät starten';$('start').classList.add('pri');$('state').textContent='Gestoppt.';$('note').textContent='–';$('oct').textContent=''}
+$('start').onclick=()=>run?stop():start();
+document.addEventListener('visibilitychange',()=>{if(document.hidden&&run)stop()});
+showA();refInfo();setNeedle(0,false);
+}
+</script>
+</body>
+</html>
