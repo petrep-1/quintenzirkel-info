@@ -29,7 +29,8 @@ h2{font-size:21px;margin:0 0 12px;font-weight:800;letter-spacing:-.01em}
 #wheel .s:hover path{filter:brightness(.94)}#wheel .s:focus{outline:none}#wheel .s:focus-visible path{stroke:var(--ink);stroke-width:3}
 #wheel .on path{fill:var(--ink)!important}#wheel .on text{fill:var(--bg)}
 #win{transition:transform .55s cubic-bezier(.3,.7,.2,1);transform-origin:300px 300px}
-.tg{display:flex;flex-wrap:wrap;gap:8px}.legend{font-size:14px;color:var(--mute);max-width:560px;margin:10px auto 0;text-align:center;text-wrap:balance}
+.tg{display:flex;flex-wrap:wrap;gap:8px}.mks{display:none}.mks svg{height:68px;width:auto;flex:none}.mks svg *{stroke:var(--ink)}.mks b{display:block;font-size:20px;line-height:1.2}.mks span{font-size:14px;color:var(--mute)}
+.legend{font-size:14px;color:var(--mute);max-width:560px;margin:10px auto 0;text-align:center;text-wrap:balance}
 .panel>section{padding:24px 0;border-top:1px solid var(--line)}.panel>section:first-child{border:0;padding-top:0}
 .title{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 16px}
 .kname{font-size:clamp(40px,5.5vw,60px);font-weight:800;line-height:1.05;letter-spacing:-.02em}
@@ -55,14 +56,14 @@ td .pl{border:0;background:none;color:var(--ink);font-size:15px;min-width:36px;m
 .scroll{overflow-x:auto}.fb{min-width:560px;width:100%;height:auto;display:block}
 .top{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-bottom:8px}
 @media(max-width:900px){.wrap{grid-template-columns:minmax(0,1fr)}.circ{position:static}}
-@media(max-width:600px){#wheel{max-width:none;width:calc(100% + 12px);margin-inline:-6px}.legend{font-size:13px}.rim{display:none}.facts{grid-template-columns:repeat(2,minmax(0,1fr))}table{font-size:13px}.ct td .sub,.ct th:nth-child(4),.ct td:nth-child(4){display:none}th,td{padding:8px 4px}.chip{min-width:40px}.chip b{font-size:15px}}
+@media(max-width:600px){.mks{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:4px}#wheel{max-width:none;width:calc(100% + 12px);margin-inline:-6px}.legend{font-size:13px}.rim{display:none}.facts{grid-template-columns:repeat(2,minmax(0,1fr))}table{font-size:13px}.ct td .sub,.ct th:nth-child(4),.ct td:nth-child(4){display:none}th,td{padding:8px 4px}.chip{min-width:40px}.chip b{font-size:15px}}
 @media(prefers-reduced-motion:reduce){#win,#wheel .s path{transition:none}}
 </style></head><body>
 <div class="band">
 <header><div><h1>Quintenzirkel</h1><div class="sub">Tippe eine Tonart an – außen Dur, innen Moll.</div></div><div class="tg">
 <div class="seg" role="group" aria-label="Notennamen"><button data-sys="de">Deutsch (H/B)</button><button data-sys="int">International (B/B♭)</button></div><div class="seg" role="group" aria-label="Notenschlüssel"><button data-clef="g">Violinschlüssel</button><button data-clef="f">Bassschlüssel</button></div></div></header>
 <div class="wrap">
-<div class="circ"><svg id="wheel" viewBox="-140 -116 880 832" role="img" aria-label="Quintenzirkel"></svg>
+<div class="circ"><div class="mks" id="mks"></div><svg id="wheel" viewBox="-140 -116 880 832" role="img" aria-label="Quintenzirkel"></svg>
 <p class="legend"><span class="rim">Am Rand stehen die Vorzeichen jeder Tonart. </span>Der Rahmen umfasst die sechs leitereigenen Dur- und Moll-Akkorde der gewählten Tonart. Nochmals auf dieselbe Tonart tippen deutet enharmonisch um (z. B. Fis ↔ Ges).</p></div>
 <div class="panel" id="panel" aria-live="polite"></div>
 </div></div>
@@ -118,7 +119,7 @@ const xy=(r,a)=>pt(r,a).split(' ');
 function fillFor(p,k){const c=p===0?0:p===6?6:p<6?p:12-p,mix=p===6?'color-mix(in oklab,var(--sharp),var(--flat))':p<6?'var(--sharp)':'var(--flat)';
   return `color-mix(in oklab,${mix} ${Math.round((8+c*8)*k)}%,var(--seg))`}
 const MQ=matchMedia('(max-width:600px)');
-function drawWheel(){let h='';const sm=MQ.matches;W.setAttribute('viewBox',sm?'-3 -3 606 606':'-140 -116 880 832');
+function drawWheel(){let h='';const sm=MQ.matches;W.setAttribute('viewBox',sm?'-3 -3 606 606':'-140 -116 880 832');{const w=56+Math.abs(st.n)*11+14;document.getElementById('mks').innerHTML=`<div><b>${kName(st.n,st.mode)}</b><span>${st.n?sigTxt(st.n)+': '+sigNotes(st.n).map(x=>nn(x).toLowerCase()).join(', '):'ohne Vorzeichen'}</span></div><svg viewBox="0 14 ${w} 92" role="img" aria-label="Vorzeichen">${sigBase(st.n,w)}</svg>`}
   for(let p=0;p<12;p++){const a=p*30,cur=pOf(st.n)===p,n=cur?st.n:prim(p),o=alt(p)!==undefined?(n===prim(p)?alt(p):prim(p)):null;
     for(const mode of['dur','moll']){const D=mode==='dur',[r1,r2]=D?[208,296]:[128,204],on=cur&&st.mode===mode;
       const [x1,y1]=xy(o!==null?(D?262:174):(D?252:166),a),[x2,y2]=xy(D?228:146,a);
