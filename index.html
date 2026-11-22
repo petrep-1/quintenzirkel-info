@@ -55,7 +55,7 @@ td .pl{border:0;background:none;color:var(--ink);font-size:15px;min-width:36px;m
 .scroll{overflow-x:auto}.fb{min-width:560px;width:100%;height:auto;display:block}
 .top{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-bottom:8px}
 @media(max-width:900px){.wrap{grid-template-columns:minmax(0,1fr)}.circ{position:static}}
-@media(max-width:600px){.facts{grid-template-columns:repeat(2,minmax(0,1fr))}table{font-size:13px}.ct td .sub,.ct th:nth-child(4),.ct td:nth-child(4){display:none}th,td{padding:8px 4px}.chip{min-width:40px}.chip b{font-size:15px}}
+@media(max-width:600px){#wheel{max-width:none;width:calc(100% + 12px);margin-inline:-6px}.legend{font-size:13px}.rim{display:none}.facts{grid-template-columns:repeat(2,minmax(0,1fr))}table{font-size:13px}.ct td .sub,.ct th:nth-child(4),.ct td:nth-child(4){display:none}th,td{padding:8px 4px}.chip{min-width:40px}.chip b{font-size:15px}}
 @media(prefers-reduced-motion:reduce){#win,#wheel .s path{transition:none}}
 </style></head><body>
 <div class="band">
@@ -63,7 +63,7 @@ td .pl{border:0;background:none;color:var(--ink);font-size:15px;min-width:36px;m
 <div class="seg" role="group" aria-label="Notennamen"><button data-sys="de">Deutsch (H/B)</button><button data-sys="int">International (B/B♭)</button></div><div class="seg" role="group" aria-label="Notenschlüssel"><button data-clef="g">Violinschlüssel</button><button data-clef="f">Bassschlüssel</button></div></div></header>
 <div class="wrap">
 <div class="circ"><svg id="wheel" viewBox="-140 -116 880 832" role="img" aria-label="Quintenzirkel"></svg>
-<p class="legend">Am Rand stehen die Vorzeichen jeder Tonart. Der Rahmen umfasst die sechs leitereigenen Dur- und Moll-Akkorde der gewählten Tonart. Nochmals auf dieselbe Tonart tippen deutet enharmonisch um (z. B. Fis ↔ Ges).</p></div>
+<p class="legend"><span class="rim">Am Rand stehen die Vorzeichen jeder Tonart. </span>Der Rahmen umfasst die sechs leitereigenen Dur- und Moll-Akkorde der gewählten Tonart. Nochmals auf dieselbe Tonart tippen deutet enharmonisch um (z. B. Fis ↔ Ges).</p></div>
 <div class="panel" id="panel" aria-live="polite"></div>
 </div></div>
 <script>
@@ -117,7 +117,8 @@ const sec=(r1,r2,a1,a2)=>`M${pt(r2,a1)}A${r2} ${r2} 0 0 1 ${pt(r2,a2)}L${pt(r1,a
 const xy=(r,a)=>pt(r,a).split(' ');
 function fillFor(p,k){const c=p===0?0:p===6?6:p<6?p:12-p,mix=p===6?'color-mix(in oklab,var(--sharp),var(--flat))':p<6?'var(--sharp)':'var(--flat)';
   return `color-mix(in oklab,${mix} ${Math.round((8+c*8)*k)}%,var(--seg))`}
-function drawWheel(){let h='';
+const MQ=matchMedia('(max-width:600px)');
+function drawWheel(){let h='';const sm=MQ.matches;W.setAttribute('viewBox',sm?'-3 -3 606 606':'-140 -116 880 832');
   for(let p=0;p<12;p++){const a=p*30,cur=pOf(st.n)===p,n=cur?st.n:prim(p),o=alt(p)!==undefined?(n===prim(p)?alt(p):prim(p)):null;
     for(const mode of['dur','moll']){const D=mode==='dur',[r1,r2]=D?[208,296]:[128,204],on=cur&&st.mode===mode;
       const [x1,y1]=xy(o!==null?(D?262:174):(D?252:166),a),[x2,y2]=xy(D?228:146,a);
@@ -125,7 +126,7 @@ function drawWheel(){let h='';
       h+=`<g class="s${on?' on':''}" tabindex="0" role="button" aria-label="${kName(n,mode)}" data-p="${p}" data-m="${mode}"><path d="${sec(r1,r2,a-14.4,a+14.4)}" style="fill:${fillFor(p,D?1:.6)}"/>
       <text x="${x1}" y="${y1}" font-size="${D?(big.length>3?25:32):(big.length>3?17:22)}" font-weight="800">${big}</text>
       <text x="${x2}" y="${y2}" font-size="${D?14:12}" font-weight="600" opacity=".75">${small}</text></g>`}}
-  for(let p=0;p<12;p++){const n=pOf(st.n)===p?st.n:prim(p),w=56+Math.abs(n)*11+6,k=.78,[cx,cy]=xy(374,p*30).map(Number),on=pOf(st.n)===p;
+  if(!sm)for(let p=0;p<12;p++){const n=pOf(st.n)===p?st.n:prim(p),w=56+Math.abs(n)*11+6,k=.78,[cx,cy]=xy(374,p*30).map(Number),on=pOf(st.n)===p;
     h+=`<g class="ks" tabindex="-1" data-p="${p}" data-m="dur" aria-hidden="true">${on?`<rect x="${(cx-w*k/2-6).toFixed(1)}" y="${(cy-41).toFixed(1)}" width="${(w*k+12).toFixed(1)}" height="82" rx="10" fill="var(--bg)" stroke="var(--ink)" stroke-width="2"/>`:`<rect x="${(cx-w*k/2-6).toFixed(1)}" y="${(cy-34).toFixed(1)}" width="${(w*k+12).toFixed(1)}" height="68" fill="transparent"/>`}<g transform="translate(${(cx-w*k/2).toFixed(1)} ${(cy-60*k).toFixed(1)}) scale(${k})">${sigBase(n,w)}</g></g>`}
   h+=`<g id="win" style="transform:rotate(${rot}deg)"><path d="${sec(124,300,-45.5,45.5)}" fill="none" stroke="var(--ink)" stroke-width="3.5" stroke-linejoin="round"/></g>
   <circle cx="300" cy="300" r="120" fill="var(--bg)"/><circle cx="300" cy="300" r="112" fill="var(--soft)"/><text x="300" y="258" font-size="14" font-weight="600" opacity=".65">${st.mode==='dur'?'Dur':'Moll'}</text>
@@ -221,7 +222,7 @@ document.addEventListener('click',e=>{const t=e.target.closest('[data-go],[data-
   else if(D.play)doPlay(D.play);else if(D.var){variant=D.var;render()}else if(D.inst){inst=D.inst;save();render()}else if(D.sys){sys=D.sys;save();render()}else if(D.clef){clef=D.clef;save();render()}});
 const ALL={};for(let n=-7;n<=7;n++)for(const m of['dur','moll'])ALL[slug(n,m)]=[n,m];
 function fromHash(){if(skip){skip=false;return}const k=ALL[decodeURIComponent(location.hash.slice(1))];if(k){st={n:k[0],mode:k[1]};render()}}
-addEventListener('hashchange',fromHash);
+addEventListener('hashchange',fromHash);MQ.addEventListener?.('change',drawWheel);
 const k0=ALL[location.hash.slice(1)];if(k0)st={n:k0[0],mode:k0[1]};lastP=pOf(st.n);rot=lastP*30;render();
 }
 </script></body></html>
