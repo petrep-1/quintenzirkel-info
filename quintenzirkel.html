@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Quintenzirkel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+/* VOICE: klar, werkstattnah, wie ein gut gestochenes Notenblatt – für Musiker, die schnell nachschlagen
+   IDEA: die Drehscheibe aus dem Musikunterricht – ein Rahmen wandert über die leitereigenen Akkorde
+   PICTURE: großer Zirkel, Kreuz-Seite warm, B-Seite kühl, dazu Notenzeile mit Vorzeichen und Griffbrett
+   COLOUR and TYPE: Weiß/Tinte, Kreuz-Rot, B-Blau; Hanken Grotesk 400/600/800
+   LAYOUT: Zirkel links (sticky), Infos rechts; unter 900px gestapelt */
+:root{color-scheme:light dark;--bg:light-dark(#ffffff,#121419);--ink:light-dark(#16171b,#ecebe6);--mute:light-dark(#5b5e66,#a2a5ad);
+--line:light-dark(#dcdad4,#2f323a);--soft:light-dark(#f4f3ef,#1b1e24);--seg:light-dark(#f7f6f2,#1d2027);
+--sharp:light-dark(#d4432a,#ff7d61);--flat:light-dark(#2b5bd6,#7ea4ff)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "Hanken Grotesk",system-ui,sans-serif;overflow-x:clip}
+.band{padding:clamp(20px,3vw,44px) max(4vw,14px)}
+.wrap{max-width:1240px;margin:auto;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.08fr);gap:clamp(20px,4vw,56px)}
+header{max-width:1240px;margin:0 auto 18px;display:flex;flex-wrap:wrap;gap:12px 24px;align-items:end;justify-content:space-between}
+h1{font-size:clamp(32px,4vw,46px);line-height:1.05;margin:0;font-weight:800;letter-spacing:-.02em}
+h2{font-size:19px;margin:0 0 10px;font-weight:800}
+.seg{display:inline-flex;border:1.5px solid var(--ink);border-radius:999px;overflow:hidden}
+.seg button{border:0;background:none;color:var(--ink);font:600 14px/1 inherit;padding:0 14px;min-height:40px;cursor:pointer}
+.seg button[aria-pressed=true]{background:var(--ink);color:var(--bg)}
+.circ{position:sticky;top:14px;align-self:start}
+#wheel{width:100%;max-width:680px;aspect-ratio:1;display:block;margin:auto;touch-action:manipulation}
+#wheel .s,#wheel .ks{cursor:pointer}#wheel .ks *{stroke:var(--ink)}#wheel .ks rect{stroke:none}#wheel .s path{transition:fill .25s}#wheel text{pointer-events:none;text-anchor:middle;dominant-baseline:middle;fill:var(--ink)}
+#wheel .s:hover path{filter:brightness(.94)}#wheel .s:focus{outline:none}#wheel .s:focus-visible path{stroke:var(--ink);stroke-width:3}
+#wheel .on path{fill:var(--ink)!important}#wheel .on text{fill:var(--bg)}
+#win{transition:transform .55s cubic-bezier(.3,.7,.2,1);transform-origin:300px 300px}
+.tg{display:flex;flex-wrap:wrap;gap:8px}.legend{font-size:14px;color:var(--mute);max-width:580px;margin:10px auto 0;text-align:center;text-wrap:balance}
+.panel>section{padding:18px 0;border-top:1px solid var(--line)}.panel>section:first-child{border:0;padding-top:0}
+.title{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 16px}
+.kname{font-size:clamp(36px,5vw,52px);font-weight:800;line-height:1.05;letter-spacing:-.02em}
+.sub{color:var(--mute)}
+.btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.b{border:1.5px solid var(--line);background:var(--bg);color:var(--ink);font:600 15px/1.2 inherit;padding:9px 14px;min-height:44px;border-radius:10px;cursor:pointer;white-space:nowrap}
+.b:hover{border-color:var(--ink)}.b:focus-visible,.seg button:focus-visible{outline:3px solid var(--flat);outline-offset:2px}
+.b.pri{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(125px,1fr));gap:10px;margin-top:14px}
+.facts div{background:var(--soft);border-radius:10px;padding:10px 12px}.facts span{display:block;font-size:13px;color:var(--mute)}.facts b{font-size:17px}
+.staff{width:100%;height:auto;display:block;margin-top:8px}.staff *{stroke:var(--ink)}
+.chips{display:flex;flex-wrap:wrap;gap:4px;align-items:end}
+.chip{text-align:center;min-width:48px}.chip i{display:block;font-style:normal;font-size:13px;color:var(--mute)}
+.chip b{display:block;background:var(--soft);border-radius:8px;padding:8px 6px;font-size:17px}.chip.t b{background:var(--ink);color:var(--bg)}
+.chip.alt b{box-shadow:inset 0 0 0 2px var(--sharp)}
+.step{font-size:13px;color:var(--mute);padding:0 1px 10px;align-self:end}.step.h{color:var(--sharp);font-weight:800}
+table{border-collapse:collapse;width:100%;font-size:15px}th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line)}
+th{font-size:13px;color:var(--mute);font-weight:600}td.r{font-weight:800}tbody tr{cursor:pointer}tbody tr:hover{background:var(--soft)}
+td .pl{border:0;background:none;color:var(--ink);font-size:15px;min-width:36px;min-height:36px;border-radius:50%;cursor:pointer}
+.prog{display:grid;gap:8px}.prog button{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 12px;text-align:left;white-space:normal}
+.prog em{font-style:normal;color:var(--mute);font-weight:400}
+.note{font-size:14px;color:var(--mute);margin:8px 0 0}
+.scroll{overflow-x:auto}.fb{min-width:560px;width:100%;height:auto;display:block}
+.top{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-bottom:8px}
+@media(max-width:900px){.wrap{grid-template-columns:minmax(0,1fr)}.circ{position:static}}
+@media(max-width:600px){table{font-size:13px}.ct td .sub,.ct th:nth-child(4),.ct td:nth-child(4){display:none}th,td{padding:8px 4px}.chip{min-width:40px}.chip b{font-size:15px}}
+@media(prefers-reduced-motion:reduce){#win,#wheel .s path{transition:none}}
+</style></head><body>
+<div class="band">
+<header><div><h1>Quintenzirkel</h1><div class="sub">Tippe eine Tonart an – außen Dur, innen Moll.</div></div><div class="tg">
+<div class="seg" role="group" aria-label="Notennamen"><button data-sys="de">Deutsch (H/B)</button><button data-sys="int">International (B/B♭)</button></div><div class="seg" role="group" aria-label="Notenschlüssel"><button data-clef="g">Violinschlüssel</button><button data-clef="f">Bassschlüssel</button></div></div></header>
+<div class="wrap">
+<div class="circ"><svg id="wheel" viewBox="-128 -118 856 836" role="img" aria-label="Quintenzirkel"></svg>
+<p class="legend">Am Rand: die Vorzeichen jeder Dur-Tonart (und ihrer Parallele). Der Rahmen umfasst die sechs leitereigenen Dur- und Moll-Akkorde der gewählten Tonart. Nochmals auf dieselbe Tonart tippen deutet enharmonisch um (z. B. Fis ↔ Ges).</p></div>
+<div class="panel" id="panel" aria-live="polite"></div>
+</div></div>
+<script>
+{
+const NAT=[0,2,4,5,7,9,11],DEL=['C','D','E','F','G','A','H'],ENL=['C','D','E','F','G','A','B'];
+const SH=[3,0,4,1,5,2,6],FL=[6,2,5,1,4,0,3],SHD=[38,35,39,36,33,37,34],FLD=[34,37,33,36,32,35,31];
+const md=(a,m)=>((a%m)+m)%m,norm=n=>n>7?n-12:n<-7?n+12:n;
+const ACC={'-2':'𝄫','-1':'♭','0':'','1':'♯','2':'𝄪'};
+let sys='de',inst='bass4',clef='g',variant='nat',st={n:0,mode:'dur'},rot=0,lastP=0;
+try{sys=localStorage.getItem('qz-sys')||'de';inst=localStorage.getItem('qz-inst')||'bass4';clef=localStorage.getItem('qz-clef')||'g'}catch(e){}
+const save=()=>{try{localStorage.setItem('qz-sys',sys);localStorage.setItem('qz-inst',inst);localStorage.setItem('qz-clef',clef)}catch(e){}};
+const note=(l,pc)=>{l=md(l,7);pc=md(pc,12);let a=md(pc-NAT[l],12);if(a>6)a-=12;return{l,a,pc}};
+const majS=n=>{const tl=md(4*n,7),tp=md(7*n,12);return NAT.map((v,i)=>note(tl+i,tp+v))};
+const up=x=>note(x.l,x.pc+1);
+function scale(n,mode,v){const s=majS(n);if(mode==='dur')return s;const m=[...s.slice(5),...s.slice(0,5)];
+  if(v==='harm')m[6]=up(m[6]);if(v==='mel'){m[5]=up(m[5]);m[6]=up(m[6])}return m}
+function deName(x){const L=DEL[x.l];if(!x.a)return L;if(x.a>0)return L+'is'.repeat(x.a);
+  if(x.l===6)return x.a===-1?'B':'Heses';if(x.l===2)return x.a===-1?'Es':'Eses';if(x.l===5)return x.a===-1?'As':'Asas';return L+'es'.repeat(-x.a)}
+const enName=x=>ENL[x.l]+ACC[x.a];
+const nn=x=>sys==='de'?deName(x):enName(x);
+const cr=x=>sys==='int'?enName(x):x.l===6?(x.a<0?'B'+ACC[x.a+1]:'H'+ACC[x.a]):enName(x);
+const tonic=(n,mode)=>majS(n)[mode==='dur'?0:5];
+function kName(n,mode){const t=tonic(n,mode);let s=nn(t);if(mode==='moll'&&sys==='de')s=s.toLowerCase();return s+(mode==='dur'?'-Dur':'-Moll')}
+const slug=(n,mode)=>deName(tonic(n,mode)).toLowerCase()+'-'+mode;
+const sigTxt=n=>n?Math.abs(n)+(n>0?' ♯':' ♭'):'keine';
+const sigNotes=n=>n>0?SH.slice(0,n).map(l=>note(l,NAT[l]+1)):FL.slice(0,-n).map(l=>note(l,NAT[l]-1));
+const sigAcc=(n,l)=>n>0&&SH.slice(0,n).includes(l)?1:n<0&&FL.slice(0,-n).includes(l)?-1:0;
+const pOf=n=>md(n,12),prim=p=>p<=6?p:p-12,alt=p=>({5:-7,6:-6,7:7})[p];
+const pick=x=>{x=norm(x);const y=x>0?x-12:x+12;return Math.abs(y)<Math.abs(x)?y:x};
+const enh=n=>{const y=n>0?n-12:n+12;return Math.abs(y)<=7?y:null};
+
+const Q3={'4,7':'','3,7':'m','3,6':'°','4,8':'+'};
+const S7={'':{11:'maj7',10:'7'},'m':{10:'m7',11:'m(maj7)'},'°':{10:'m7♭5',9:'°7'},'+':{11:'+maj7',10:'+7'}};
+function chord(s,i){const r=s[i],t=s[(i+2)%7],f=s[(i+4)%7],se=s[(i+6)%7],iv=x=>md(x.pc-r.pc,12);
+  const tri=Q3[iv(t)+','+iv(f)]??'',sev=(S7[tri]||{})[iv(se)]||'';const rom=['I','II','III','IV','V','VI','VII'][i];
+  return{r,n3:[r,t,f],n4:[r,t,f,se],tri,sev,R:(iv(t)===4?rom:rom.toLowerCase())+(tri==='°'?'°':tri==='+'?'+':'')}}
+const sym=(c,s7)=>cr(c.r)+(s7?c.sev:c.tri);
+const FN={dur:[['T','Tonika'],['Sp','Subdominantparallele'],['Dp','Dominantparallele'],['S','Subdominante'],['D','Dominante'],['Tp','Tonikaparallele'],['Đ','verkürzter Dominantseptakkord']],
+ nat:[['t','Tonika'],['(s)','Subdominantbereich, vermindert'],['tP','Tonikaparallele'],['s','Subdominante'],['d','Moll-Dominante'],['sP','Subdominantparallele'],['dP','Dominantparallele']],
+ harm:[['t','Tonika'],['(s)','Subdominantbereich, vermindert'],['tP+','übermäßig'],['s','Subdominante'],['D','Dur-Dominante mit Leitton'],['sP','Subdominantparallele'],['Đ','verkürzter Dominantseptakkord']],
+ mel:[['t','Tonika'],['s','Moll-Subdominantbereich'],['tP+','übermäßig'],['S','Dur-Subdominante'],['D','Dur-Dominante'],['–','vermindert'],['Đ','vermindert, Leitton']]};
+const PR={dur:[['Kadenz','I–IV–V–I',[0,3,4,0]],['Pop','I–V–vi–IV',[0,4,5,3]],['50er-Jahre','I–vi–IV–V',[0,5,3,4]],['Jazz','ii⁷–V⁷–Imaj⁷',[1,4,0],1],['Pachelbel-Kanon','I–V–vi–iii–IV–I–IV–V',[0,4,5,2,3,0,3,4]]],
+ moll:[['Kadenz','i–iv–V–i',[0,3,'4h',0]],['Andalusisch','i–VII–VI–V',[0,6,5,'4h']],['Epic / Filmmusik','i–VI–III–VII',[0,5,2,6]],['Jazz in Moll','iiø⁷–V⁷–i⁷',[1,'4h',0],1],['Modal (natürlich)','i–iv–v–i',[0,3,4,0]]]};
+const INST=[['B-Instrumente','Klarinette, Trompete, Flügelhorn, Tenorhorn, Tenorsax',2],['Es-Instrumente','Altsax, Baritonsax, Es-Horn, Es-Klarinette',3],['F-Instrumente','Waldhorn in F',1]];
+const TUN={bass4:['Bass (4)',[28,33,38,43]],bass5:['Bass (5)',[23,28,33,38,43]],git:['Gitarre',[40,45,50,55,59,64]]};
+
+/* ---- Zirkel ---- */
+const W=document.getElementById('wheel'),P=document.getElementById('panel');
+const pt=(r,a)=>{a=a*Math.PI/180;return(300+r*Math.sin(a)).toFixed(1)+' '+(300-r*Math.cos(a)).toFixed(1)};
+const sec=(r1,r2,a1,a2)=>`M${pt(r2,a1)}A${r2} ${r2} 0 0 1 ${pt(r2,a2)}L${pt(r1,a2)}A${r1} ${r1} 0 0 0 ${pt(r1,a1)}Z`;
+const xy=(r,a)=>pt(r,a).split(' ');
+function fillFor(p,k){const c=p===0?0:p===6?6:p<6?p:12-p,mix=p===6?'color-mix(in oklab,var(--sharp),var(--flat))':p<6?'var(--sharp)':'var(--flat)';
+  return `color-mix(in oklab,${mix} ${Math.round((8+c*8)*k)}%,var(--seg))`}
+function drawWheel(){let h='';
+  for(let p=0;p<12;p++){const a=p*30,cur=pOf(st.n)===p,n=cur?st.n:prim(p),o=alt(p)!==undefined?(n===prim(p)?alt(p):prim(p)):null;
+    for(const mode of['dur','moll']){const D=mode==='dur',[r1,r2]=D?[208,296]:[128,204],on=cur&&st.mode===mode;
+      const [x1,y1]=xy(D?258:170,a),[x2,y2]=xy(D?228:146,a);
+      const big=kName(n,mode).replace(/-(Dur|Moll)$/,''),small=D?sigTxt(n).replace(' ','')+(o!==null?' · '+kName(o,mode).replace(/-Dur$/,''):''):(o!==null?kName(o,mode).replace(/-Moll$/,''):'');
+      h+=`<g class="s${on?' on':''}" tabindex="0" role="button" aria-label="${kName(n,mode)}" data-p="${p}" data-m="${mode}"><path d="${sec(r1,r2,a-14.4,a+14.4)}" style="fill:${fillFor(p,D?1:.6)}"/>
+      <text x="${x1}" y="${y1}" font-size="${D?(big.length>3?22:28):(big.length>3?16:20)}" font-weight="800">${big}</text>
+      <text x="${x2}" y="${y2}" font-size="${D?13:11.5}" opacity=".8">${small}</text></g>`}}
+  for(let p=0;p<12;p++){const n=pOf(st.n)===p?st.n:prim(p),w=56+Math.abs(n)*11+6,k=.7,[cx,cy]=xy(368,p*30).map(Number),on=pOf(st.n)===p;
+    h+=`<g class="ks" tabindex="-1" data-p="${p}" data-m="dur" aria-hidden="true">${on?`<rect x="${(cx-w*k/2-6).toFixed(1)}" y="${(cy-38).toFixed(1)}" width="${(w*k+12).toFixed(1)}" height="76" rx="8" fill="var(--soft)"/>`:`<rect x="${(cx-w*k/2-6).toFixed(1)}" y="${(cy-34).toFixed(1)}" width="${(w*k+12).toFixed(1)}" height="68" fill="transparent"/>`}<g transform="translate(${(cx-w*k/2).toFixed(1)} ${(cy-60*k).toFixed(1)}) scale(${k})">${sigBase(n,w)}</g></g>`}
+  h+=`<g id="win" style="transform:rotate(${rot}deg)"><path d="${sec(124,300,-45.5,45.5)}" fill="none" stroke="var(--ink)" stroke-width="3.5" stroke-linejoin="round"/></g>
+  <circle cx="300" cy="300" r="118" fill="var(--soft)"/><text x="300" y="276" font-size="15" opacity=".7">${st.mode==='dur'?'Dur':'Moll'}</text>
+  <text x="300" y="312" font-size="${kName(st.n,st.mode).length>8?30:38}" font-weight="800">${kName(st.n,st.mode).replace(/-(Dur|Moll)$/,'')}</text>
+  <text x="300" y="350" font-size="15" opacity=".7">${sigTxt(st.n)}</text>`;
+  W.innerHTML=h}
+
+/* ---- Notenzeile ---- */
+const gs={1:'M-2.2 -11V9M2.4 -9V11',f:'M-5 -2.5L5 -5.5V-3L-5 0ZM-5 4L5 1V3.5L-5 6.5Z'};
+function acc(a,x,y){if(a===1)return`<g transform="translate(${x} ${y})"><path d="${gs[1]}" stroke-width="1.3"/><path d="${gs.f}" fill="var(--ink)" stroke="none"/></g>`;
+  if(a===-1)return`<g transform="translate(${x} ${y})"><path d="M-3 -17V5" stroke-width="1.4"/><path d="M-3 5C6 0 6 -8 -3 -2" fill="none" stroke-width="2"/></g>`;
+  if(a===0)return`<g transform="translate(${x} ${y})"><path d="M-3 -10V5M3 -5V10" stroke-width="1.3"/><path d="M-3 -1L3 -3M-3 5L3 3" stroke-width="2.6"/></g>`;
+  if(a===2)return`<path d="M${x-4} ${y-4}l8 8m0 -8l-8 8" stroke-width="2.2"/>`;
+  return acc(-1,x-4,y)+acc(-1,x+4,y)}
+const CL={g:{b:30,sig:0,lo:28,c:`<path d="M25 72C19 74 15 67 21 63C29 59 35 68 30 76C25 83 12 80 11 70C10 58 22 52 28 42C33 33 31 22 26 22C21 22 19 32 21 44L27 92C28 99 20 101 18 95" fill="none" stroke-width="2.4" stroke-linecap="round"/><circle cx="19.5" cy="94" r="3.2" fill="var(--ink)" stroke="none"/>`},
+ f:{b:18,sig:-14,lo:14,c:`<path d="M13 50C12 38 30 35 33 47C35 61 23 75 8 84" fill="none" stroke-width="2.7" stroke-linecap="round"/><circle cx="13" cy="50" r="3.8" fill="var(--ink)" stroke="none"/><circle cx="40" cy="45" r="2.2" fill="var(--ink)" stroke="none"/><circle cx="40" cy="55" r="2.2" fill="var(--ink)" stroke="none"/>`}};
+function sigBase(n,W){const C=CL[clef],Y=d=>80-(d-C.b)*5,ks=Math.abs(n);let h='';
+  for(let i=0;i<5;i++)h+=`<path d="M4 ${40+i*10}H${W-4}" stroke-width="1"/>`;
+  h+=`<path d="M4 40V80M${W-4} 40V80" stroke-width="1.2"/>`+C.c;
+  for(let i=0;i<ks;i++)h+=acc(n>0?1:-1,56+i*11,Y((n>0?SHD:FLD)[i]+C.sig));return h}
+function staff(s,n){const W=600,C=CL[clef],Y=d=>80-(d-C.b)*5,ks=Math.abs(n),x0=56+ks*11+18,dx=(W-x0-14)/8;let h=sigBase(n,W);
+  const t=s[0],o=t.l;[...s,t].forEach((x,i)=>{const d=C.lo+o+i,cx=x0+dx*i+dx/2,cy=Y(d);
+    for(let k=C.b-2;k>=d;k-=2)h+=`<path d="M${cx-11} ${Y(k)}H${cx+11}" stroke-width="1"/>`;
+    for(let k=C.b+10;k<=d;k+=2)h+=`<path d="M${cx-11} ${Y(k)}H${cx+11}" stroke-width="1"/>`;
+    if(x.a!==sigAcc(n,x.l))h+=acc(x.a,cx-17,cy);
+    h+=`<ellipse cx="${cx}" cy="${cy}" rx="7" ry="5" fill="var(--ink)" stroke="none"/><ellipse cx="${cx}" cy="${cy}" rx="3.6" ry="2.4" transform="rotate(-35 ${cx} ${cy})" fill="var(--bg)" stroke="none"/>`});
+  return`<svg class="staff" viewBox="0 0 ${W} 120" role="img" aria-label="Notenzeile mit Vorzeichen und Tonleiter">${h}</svg>`}
+
+/* ---- Griffbrett ---- */
+function fret(s){const [,tu]=TUN[inst],S=tu.length,H=S*30+34,fx=f=>36+f*44,pcs=s.map(x=>x.pc);let h='';
+  [3,5,7,9].forEach(f=>h+=`<circle cx="${fx(f)-22}" cy="${(S*30)/2+8}" r="5" fill="var(--line)"/>`);
+  h+=`<circle cx="${fx(12)-22}" cy="${(S*30)/2-7}" r="5" fill="var(--line)"/><circle cx="${fx(12)-22}" cy="${(S*30)/2+23}" r="5" fill="var(--line)"/>`;
+  for(let f=0;f<=12;f++)h+=`<path d="M${fx(f)} 8V${S*30+8}" stroke="var(--ink)" stroke-width="${f?1.2:4}" opacity="${f?.45:1}"/><text x="${fx(f)-22}" y="${S*30+26}" font-size="12" fill="var(--mute)" text-anchor="middle">${f||''}</text>`;
+  [...tu].reverse().forEach((m,j)=>{const y=23+j*30;h+=`<path d="M${fx(0)} ${y}H${fx(12)}" stroke="var(--mute)" stroke-width="${1+(S-1-j)*.35}"/>`;
+    for(let f=0;f<=12;f++){const k=pcs.indexOf(md(m+f,12));if(k<0)continue;const x=f?fx(f)-22:16,T=k===0;
+      h+=`<circle cx="${x}" cy="${y}" r="12" fill="${T?'var(--ink)':'var(--bg)'}" stroke="var(--ink)" stroke-width="1.5"/><text x="${x}" y="${y+4}" font-size="${nn(s[k]).length>3?8.5:11}" font-weight="700" text-anchor="middle" fill="${T?'var(--bg)':'var(--ink)'}">${nn(s[k])}</text>`}});
+  return`<svg class="fb" viewBox="0 0 ${fx(12)+8} ${H}" role="img" aria-label="Griffbrett">${h}</svg>`}
+
+/* ---- Panel ---- */
+function render(){const {n,mode}=st,v=mode==='dur'?'dur':variant,s=scale(n,mode,mode==='dur'?'':variant),nat=scale(n,mode,'nat'),har=scale(n,mode,'harm');
+  const ch=s.map((_,i)=>chord(s,i)),fn=FN[v],e=enh(n),par=mode==='dur'?'moll':'dur',V7=chord(mode==='dur'?s:har,4);
+  const lt=(mode==='dur'?s:har)[6],sig=sigNotes(n).map(x=>sys==='de'?nn(x).toLowerCase():nn(x)).join(', ');
+  const steps=s.map((x,i)=>md((s[i+1]||s[0]).pc-x.pc,12));
+  const rel=[['Dominanttonart',pick(n+1),mode],['Subdominanttonart',pick(n-1),mode],['Paralleltonart',n,par],['Varianttonart',mode==='dur'?pick(n-3):pick(n+3),par],['Doppeldominant-Tonart',pick(n+2),mode]];
+  if(e!==null)rel.push(['Enharmonisch',e,mode]);
+  let h=`<section><div class="title"><span class="kname">${kName(n,mode)}</span><span class="sub">${enName(tonic(n,mode))} ${mode==='dur'?'major':'minor'}</span></div>
+  <div class="facts"><div><span>Vorzeichen</span><b>${sigTxt(n)}</b>${sig?`<div class="sub">${sig}</div>`:''}</div>
+  <div><span>Paralleltonart</span><b>${kName(n,par)}</b></div><div><span>Leitton</span><b>${nn(lt)}</b></div>
+  <div><span>Dominantseptakkord</span><b>${sym(V7,1)}</b><div class="sub">${V7.n4.map(nn).join(' – ')}</div></div></div>
+  <div class="btns"><button class="b pri" data-play="sc">▶ Tonleiter</button><button class="b" data-play="c0">▶ Tonika-Akkord</button><button class="b" data-play="cad">▶ Kadenz</button>${e!==null?`<button class="b" data-go="${e},${mode}">⇄ ${kName(e,mode)}</button>`:''}</div></section>`;
+  h+=`<section><div class="top"><h2>Tonleiter</h2>${mode==='moll'?`<div class="seg" role="group" aria-label="Moll-Form">${[['nat','natürlich'],['harm','harmonisch'],['mel','melodisch']].map(([k,l])=>`<button data-var="${k}" aria-pressed="${variant===k}">${l}</button>`).join('')}</div>`:''}</div>
+  ${staff(s,n)}<div class="chips">${s.map((x,i)=>`<div class="chip${i?'':' t'}${mode==='moll'&&x.a!==nat[i].a?' alt':''}"><i>${i+1}</i><b>${nn(x)}</b></div>${`<div class="step${steps[i]===1?' h':''}">${['','½','1','1½'][steps[i]]}</div>`}`).join('')}<div class="chip t"><i>8</i><b>${nn(s[0])}</b></div></div>
+  <p class="note">Schritte in Ganztönen: <b style="color:var(--sharp)">½</b> = Halbton, 1½ = übermäßige Sekunde.${mode==='moll'&&variant==='mel'?' Melodisch Moll wird klassisch nur aufwärts so gespielt, abwärts natürlich.':''}${mode==='moll'&&variant!=='nat'?' Rot umrandet: gegenüber natürlich Moll erhöhte Töne.':''}</p></section>`;
+  h+=`<section><h2>Leitereigene Akkorde</h2><table class="ct"><thead><tr><th>Stufe</th><th>Dreiklang</th><th>Vierklang</th><th>Töne</th><th>Funktion</th><th></th></tr></thead><tbody>
+  ${ch.map((c,i)=>`<tr data-play="c${i}"><td class="r">${c.R}</td><td><b>${sym(c)}</b></td><td>${sym(c,1)}</td><td>${c.n3.map(nn).join(' ')}</td><td title="${fn[i][1]}"><b>${fn[i][0]}</b> <span class="sub">${fn[i][1]}</span></td><td><button class="pl" aria-label="${sym(c)} abspielen">▶</button></td></tr>`).join('')}</tbody></table>
+  ${mode==='moll'&&variant==='nat'?`<p class="note">In Moll wird die Dominante meist aus harmonisch Moll gebildet: <b>${sym(chord(har,4))}</b> bzw. <b>${sym(chord(har,4),1)}</b> statt ${sym(ch[4])}.</p>`:''}</section>`;
+  h+=`<section><h2>Typische Akkordfolgen</h2><div class="prog">${PR[mode].map((p,k)=>`<button class="b" data-play="p${k}"><span>▶ ${p[0]} <em>${p[1]}</em></span><span>${p[2].map(d=>{const h=typeof d==='string',c=chord(h?har:nat,parseInt(d));return sym(c,p[3])}).join(' – ')}</span></button>`).join('')}</div></section>`;
+  h+=`<section><h2>Verwandte Tonarten</h2><div class="btns">${rel.map(([l,k,m])=>`<button class="b" data-go="${k},${m}"><span class="sub">${l}:</span> ${kName(k,m)}</button>`).join('')}</div>
+  <p class="note">Benachbarte Tonarten im Zirkel unterscheiden sich nur um ein Vorzeichen – Modulationen dorthin klingen besonders natürlich.</p></section>`;
+  h+=`<section><h2>Für transponierende Instrumente</h2><table class="stack"><thead><tr><th>Stimme</th><th>notiert in</th><th>Vorzeichen</th></tr></thead><tbody style="cursor:default">
+  ${INST.map(([a,b,k])=>{const w=pick(n+k);return`<tr><td><b>${a}</b><div class="sub">${b}</div></td><td><b>${kName(w,mode)}</b></td><td>${sigTxt(w)}</td></tr>`}).join('')}</tbody></table>
+  <p class="note">Klingend ${kName(n,mode)}. B-Stimmen stehen einen Ganzton höher, Es-Stimmen eine große Sexte höher, F-Stimmen eine Quinte höher.</p></section>`;
+  h+=`<section><div class="top"><h2>Griffbrett</h2><div class="seg" role="group" aria-label="Instrument">${Object.entries(TUN).map(([k,[l]])=>`<button data-inst="${k}" aria-pressed="${inst===k}">${l}</button>`).join('')}</div></div>
+  <div class="scroll">${fret(s)}</div><p class="note">Bünde 0–12, gefüllt = Grundton.</p></section>`;
+  P.innerHTML=h;
+  document.querySelectorAll('[data-sys]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.sys===sys));document.querySelectorAll('[data-clef]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.clef===clef));
+  const p=pOf(n);let d=md(p-lastP,12);if(d>6)d-=12;rot+=d*30;lastP=p;drawWheel();
+  const sl=slug(n,mode);if(location.hash.slice(1)!==sl){skip=true;location.hash=sl}
+  document.title=kName(n,mode)+' – Quintenzirkel'}
+
+/* ---- Klang ---- */
+let ac;
+function tone(m,t,d,g){const o=ac.createOscillator(),v=ac.createGain();o.type='triangle';o.frequency.value=440*2**((m-69)/12);
+  v.gain.setValueAtTime(0,t);v.gain.linearRampToValueAtTime(g,t+.012);v.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(v).connect(ac.destination);o.start(t);o.stop(t+d+.05)}
+function play(seq){try{ac=ac||new(window.AudioContext||window.webkitAudioContext)();ac.resume();let t=ac.currentTime+.05;
+  seq.forEach(([ms,d])=>{ms.forEach(m=>tone(m,t,d*1.7,.22/Math.sqrt(ms.length)));t+=d})}catch(e){}}
+const cm=c=>{let pr=-1;return[36+c.r.pc,...c.n3.map((x,i)=>{let m=48+x.pc;while(m<=pr)m+=12;pr=m;return m})]};
+function doPlay(k){const {n,mode}=st,s=scale(n,mode,mode==='dur'?'':variant),nat=scale(n,mode,'nat'),har=scale(n,mode,'harm');
+  if(k==='sc'){let b=60+s[0].pc;if(b>65)b-=12;play([...s.map(x=>[[b+md(x.pc-s[0].pc,12)],.3]),[[b+12],.6]]);return}
+  if(k==='cad')k='p0';
+  if(k[0]==='c'){play([[cm(chord(s,+k.slice(1))),1.1]]);return}
+  const p=PR[mode][+k.slice(1)];play(p[2].map(d=>[cm(chord(typeof d==='string'?har:nat,parseInt(d))),.85]))}
+
+/* ---- Ereignisse ---- */
+let skip=false;
+function go(n,mode){st={n,mode};render()}
+W.addEventListener('click',e=>{const g=e.target.closest('.s,.ks');if(!g)return;const p=+g.dataset.p,m=g.dataset.m;
+  if(pOf(st.n)===p&&st.mode===m&&alt(p)!==undefined)go(st.n===prim(p)?alt(p):prim(p),m);
+  else go(pOf(st.n)===p?st.n:prim(p),m)});
+W.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();e.target.dispatchEvent(new MouseEvent('click',{bubbles:true}))}});
+document.addEventListener('click',e=>{const t=e.target.closest('[data-go],[data-play],[data-var],[data-inst],[data-sys],[data-clef]');if(!t)return;const D=t.dataset;
+  if(D.go){const [n,m]=D.go.split(',');go(+n,m);if(innerWidth<900)window.scrollTo({top:0,behavior:'smooth'})}
+  else if(D.play)doPlay(D.play);else if(D.var){variant=D.var;render()}else if(D.inst){inst=D.inst;save();render()}else if(D.sys){sys=D.sys;save();render()}else if(D.clef){clef=D.clef;save();render()}});
+const ALL={};for(let n=-7;n<=7;n++)for(const m of['dur','moll'])ALL[slug(n,m)]=[n,m];
+function fromHash(){if(skip){skip=false;return}const k=ALL[decodeURIComponent(location.hash.slice(1))];if(k){st={n:k[0],mode:k[1]};render()}}
+addEventListener('hashchange',fromHash);
+const k0=ALL[location.hash.slice(1)];if(k0)st={n:k0[0],mode:k0[1]};lastP=pOf(st.n);rot=lastP*30;render();
+}
+</script></body></html>
