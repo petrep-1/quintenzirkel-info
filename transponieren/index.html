@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Transponier-Helfer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* VOICE: klar, praktisch, wie ein gut gesetzter Stimmen-Zettel im Notenpult
+   IDEA: ein Stimmensatz – eine Vorlage, die für jede Stimmung neu ausgeschrieben wird
+   PICTURE: das Werkzeug selbst: Eingabe, großes Ergebnis, Halbton-Zuordnung als Leiste
+   COLOUR and TYPE: Weiß, Notentinte, Karnevals-Rot als Akzent; Archivo + Inter
+   LAYOUT: Titel klein oben, Werkzeug direkt darunter, dann Zuordnung, dann alle Stimmen */
+:root{color-scheme:light dark;--bg:light-dark(#ffffff,#121214);--ink:light-dark(#141416,#f1f1f3);--mut:light-dark(#5d5f66,#a3a6ad);--line:light-dark(#e3e4e8,#2c2d33);--card:light-dark(#f5f5f7,#1b1c20);--red:light-dark(#c8102e,#ff5d70);--redbg:light-dark(#fdeef0,#3a1a20)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Inter,system-ui,sans-serif;overflow-x:clip}
+.band{padding:clamp(22px,4vw,56px) max(5vw,16px)}
+.wrap{max-width:1240px;margin:0 auto}
+.back{display:inline-flex;align-items:center;min-height:44px;color:inherit;font-weight:600;text-underline-offset:3px;margin:-10px 0 2px}
+h1,h2{font-family:Archivo,Inter,sans-serif;line-height:1.05;text-wrap:balance;margin:0}
+h1{font-size:clamp(32px,5vw,48px);font-weight:800}
+h2{font-size:clamp(22px,3vw,28px);font-weight:700;margin-bottom:14px}
+.lead{color:var(--mut);margin:8px 0 0;max-width:62ch}
+header.band{padding-bottom:18px;background:repeating-linear-gradient(to bottom,transparent 0 13px,var(--line) 13px 14px) bottom/100% 70px no-repeat}
+.tool{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:20px}
+@media(max-width:860px){.tool{grid-template-columns:minmax(0,1fr)}}
+.panel{background:var(--card);border-radius:14px;padding:18px}
+label{display:block;font-size:14px;font-weight:600;margin:0 0 6px}
+select,textarea,button{font:inherit;font-size:16px;color:var(--ink)}
+select,textarea{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-height:44px}
+textarea{min-height:110px;resize:vertical;font-family:Archivo,Inter,sans-serif;font-size:18px}
+select:focus-visible,textarea:focus-visible,button:focus-visible{outline:3px solid var(--red);outline-offset:2px}
+.dir{display:grid;grid-template-columns:minmax(0,1fr) 48px minmax(0,1fr);gap:10px;align-items:end}
+.row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;margin-top:14px}
+button{min-height:44px;border-radius:10px;border:1px solid var(--line);background:var(--bg);cursor:pointer;padding:0 14px}
+button:hover{border-color:var(--ink)}
+#swap{width:48px;font-size:20px;padding:0}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.chips button{min-height:36px;font-size:14px;padding:0 12px;border-radius:999px}
+.step{display:flex;align-items:center;gap:8px;margin-top:14px}
+.step span{min-width:6.5em;text-align:center;font-weight:600}
+.step button{width:44px;padding:0;font-size:20px}
+.res{background:var(--ink);color:var(--bg);border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:12px}
+.res .tag{font-size:14px;opacity:.75}
+#out{font-family:Archivo,Inter,sans-serif;font-weight:700;font-size:clamp(26px,4.2vw,40px);line-height:1.3;white-space:pre-wrap;overflow-wrap:anywhere;min-height:2.6em}
+#out .c{color:light-dark(#ff9aa8,#c8102e)}
+#out .x{opacity:.45}
+.meta{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:15px}
+.meta b{font-weight:600}
+.res button{align-self:flex-start;background:transparent;color:var(--bg);border-color:color-mix(in srgb,var(--bg) 40%,transparent)}
+.strip{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:6px}
+.cell{border:1px solid var(--line);border-radius:10px;text-align:center;padding:8px 2px;font-family:Archivo,Inter,sans-serif;font-weight:700}
+.cell .a{font-size:15px;color:var(--mut)}.cell .ar{font-size:12px;color:var(--mut);line-height:1}.cell .b{font-size:18px}
+.cell.on{border-color:var(--red);background:var(--redbg)}.cell.on .b{color:var(--red)}
+@media(max-width:600px){.strip{grid-template-columns:repeat(6,minmax(0,1fr))}}
+table{width:100%;border-collapse:collapse}
+th,td{text-align:left;padding:12px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:14px;color:var(--mut);font-weight:600}
+td.w{font-family:Archivo,Inter,sans-serif;font-weight:700;font-size:18px;overflow-wrap:anywhere}
+td small{display:block;color:var(--mut);font-size:13px;font-weight:400}
+tr.me td{background:var(--redbg)}
+.nowrap{white-space:nowrap}
+.ref{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:16px}
+.ref p{margin:6px 0 0;color:var(--mut);font-size:15px}
+.ref h3{margin:0;font-size:17px}
+footer{color:var(--mut);font-size:13px}
+@media(max-width:600px){table{font-size:13px}.stack thead{display:none}.stack tr{display:grid;padding-block:10px;border-bottom:1px solid var(--line)}.stack td{display:flow-root;border:0;padding:3px 0;padding-inline-start:7em;text-align:start}.stack td::before{content:attr(data-l);float:inline-start;width:6.5em;margin-inline-start:-7em;white-space:normal;color:var(--mut);font:600 13px Inter,sans-serif}.stack td:empty{display:none}}
+@media(prefers-reduced-motion:no-preference){#out{transition:opacity .15s}#out.f{opacity:.3}}
+</style>
+<script>new MutationObserver(()=>{for(const c of document.querySelectorAll('.stack td:not([data-l])')){let i=0,p=c;while(p=p.previousElementSibling)i+=p.colSpan;c.dataset.l=c.closest('table').rows[0].cells[i]?.textContent||''}}).observe(document,{childList:true,subtree:true})</script>
+</head>
+<body>
+<header class="band"><div class="wrap">
+  <a class="back" href="../">← Quintenzirkel</a>
+  <h1>Transponier-Helfer</h1>
+  <p class="lead">Akkorde oder Töne eingeben, Stimmung wählen – fertig. Wandelt zwischen klingend, B-, Es-, F-Stimmen und zwischen deutscher (H/B), englischer und Solfège-Schreibweise.</p>
+</div></header>
+
+<main>
+<section class="band" style="padding-top:8px"><div class="wrap tool">
+  <div class="panel">
+    <div class="dir">
+      <div><label for="from">Vorlage ist notiert für</label><select id="from"></select></div>
+      <button id="swap" title="Richtung umdrehen" aria-label="Richtung umdrehen">⇄</button>
+      <div><label for="to">Ausschreiben für</label><select id="to"></select></div>
+    </div>
+    <div class="row">
+      <div><label for="nin">Schreibweise Eingabe</label><select id="nin"></select></div>
+      <div><label for="nout">Schreibweise Ausgabe</label><select id="nout"></select></div>
+    </div>
+    <div style="margin-top:14px"><label for="txt">Akkorde oder Töne</label>
+      <textarea id="txt" spellcheck="false" autocapitalize="off" autocomplete="off"></textarea></div>
+    <div class="chips" id="chips"></div>
+    <div class="row">
+      <div><label for="spell">Vorzeichen</label><select id="spell">
+        <option value="auto">Automatisch nach Tonart</option><option value="sharp">Immer ♯ (Kreuz)</option><option value="flat">Immer ♭ (B)</option></select></div>
+      <div><label>Zusätzlich verschieben</label>
+        <div class="step" style="margin-top:0"><button id="dn" aria-label="Halbton tiefer">−</button><span id="xv">0 HT</span><button id="up" aria-label="Halbton höher">+</button></div></div>
+    </div>
+  </div>
+
+  <div class="res" aria-live="polite">
+    <div class="tag" id="rtag"></div>
+    <div id="out"></div>
+    <div class="meta" id="meta"></div>
+    <button id="copy">Ergebnis kopieren</button>
+  </div>
+</div></section>
+
+<section class="band" style="padding-top:0"><div class="wrap">
+  <h2>Welcher Ton wird zu welchem?</h2>
+  <div class="strip" id="strip"></div>
+  <p class="lead" style="font-size:14px">Oben: Ton in der Vorlage · unten: Ton in der neuen Stimme. Rot markiert sind die Töne aus deiner Eingabe.</p>
+</div></section>
+
+<section class="band" style="padding-top:0"><div class="wrap">
+  <h2>Dieselbe Vorlage für alle Stimmen</h2>
+  <table class="stack"><thead><tr><th>Stimmung</th><th>So steht es in der Stimme</th><th>Tonart</th></tr></thead><tbody id="all"></tbody></table>
+</div></section>
+
+<section class="band" style="padding-top:0"><div class="wrap">
+  <h2>Kurz erklärt</h2>
+  <div class="ref">
+    <div><h3>Deutsch vs. Englisch</h3><p>Deutsches H = englisches B. Deutsches B = englisches B♭ (Bb). Erhöht wird mit -is (Fis), erniedrigt mit -es (Des), Ausnahmen: Es, As, B. Kleingeschrieben (a, fis) bedeutet im Deutschen Moll.</p></div>
+    <div><h3>B-Instrumente</h3><p>Klarinette, Trompete, Flügelhorn, Tenorsax, Tenorhorn: notiert wird eine große Sekunde (2 Halbtöne) höher als klingend. Klingend C = notiert D.</p></div>
+    <div><h3>Es-Instrumente</h3><p>Altsax, Baritonsax, Es-Horn: notiert eine große Sexte höher (oder kleine Terz tiefer). Klingend C = notiert A.</p></div>
+    <div><h3>F-Instrumente</h3><p>Waldhorn, Englischhorn: notiert eine Quinte höher. Klingend C = notiert G. Oktavlagen (z. B. Tenorsax eine Oktave tiefer klingend) ändern die Notennamen nicht.</p></div>
+  </div>
+</div></section>
+</main>
+<footer class="band" style="padding-top:0"><div class="wrap">Erkennt Akkordzusätze wie m, 7, maj7, sus4, dim, add9 und Basstöne (G/H). Wörter, die keine Akkorde sind, bleiben unverändert.</div></footer>
+
+<script>
+{
+const $=id=>document.getElementById(id);
+const INS=[
+ ['Klingend / C-Instrumente (Flöte, Oboe, Posaune, Klavier, Tuba im Bassschlüssel)',0,'C'],
+ ['Klarinette in B',2,'B'],['Trompete / Flügelhorn in B',2,'B'],['Sopransaxophon',2,'B'],
+ ['Tenorsaxophon',14,'B'],['Bassklarinette',14,'B'],['Tenorhorn / Bariton (Violinschlüssel)',14,'B'],['Posaune in B (Violinschlüssel)',14,'B'],['Tuba in B (Violinschlüssel)',26,'B'],
+ ['Altsaxophon',9,'Es'],['Baritonsaxophon',21,'Es'],['Es-Horn / Es-Alt',9,'Es'],['Es-Klarinette',-3,'Es'],['Es-Tuba (Violinschlüssel)',33,'Es'],
+ ['Waldhorn in F',7,'F'],['Englischhorn',7,'F'],['Altflöte in G',5,'G'],
+ ['Gitarre',12,'C'],['E-Bass / Kontrabass',12,'C'],['Piccoloflöte',-12,'C']];
+const GROUPS=[['C','C-Stimme / klingend',0,'Flöte, Oboe, Fagott, Posaune, Bariton & Tuba (Bassschlüssel), Klavier, Gitarre, Bass'],
+ ['B','B-Stimme',2,'Klarinette, Trompete, Flügelhorn, Sopran- & Tenorsax, Tenorhorn (Violinschlüssel)'],
+ ['Es','Es-Stimme',9,'Altsax, Baritonsax, Es-Horn, Es-Klarinette'],
+ ['F','F-Stimme',7,'Waldhorn, Englischhorn'],['G','G-Stimme',5,'Altflöte']];
+const NOT={de:'Deutsch (C D E F G A H B, Fis, Es …)',en:'Englisch (C D E F G A B, F#, Eb …)',sol:'Solfège (Do Re Mi Fa Sol La Si)'};
+const NAMES={
+ en:[['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'],['C','Db','D','Eb','E','F','Gb','G','Ab','A','Bb','B']],
+ de:[['C','Cis','D','Dis','E','F','Fis','G','Gis','A','Ais','H'],['C','Des','D','Es','E','F','Ges','G','As','A','B','H']],
+ sol:[['Do','Do#','Re','Re#','Mi','Fa','Fa#','Sol','Sol#','La','La#','Si'],['Do','Reb','Re','Mib','Mi','Fa','Solb','Sol','Lab','La','Sib','Si']]};
+const IV=['Prime','kleine Sekunde','große Sekunde','kleine Terz','große Terz','Quarte','Tritonus','Quinte','kleine Sexte','große Sexte','kleine Septime','große Septime'];
+const BASE={C:0,D:2,E:4,F:5,G:7,A:9,H:11,B:11};
+const DEB={C:0,D:2,E:4,F:5,G:7,A:9,H:11,B:10};
+const SOL={do:0,re:2,mi:4,fa:5,sol:7,so:7,la:9,si:11,ti:11};
+const QRE=/^(maj|min|dim|aug|sus|add|alt|omit|no|m|M|°|ø|o|Δ|\+|-|\d+|#|b|♯|♭|\(|\)|,|\.)*$/;
+const FLATMAJ=new Set([5,10,3,8,1]);
+const mod=n=>((n%12)+12)%12;
+const esc=s=>s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let extra=0;
+
+function parseRoot(s,n){
+  let pc,rest,lower=false;
+  if(n==='sol'){const m=/^(sol|so|do|re|mi|fa|la|si|ti)/i.exec(s);if(!m)return null;pc=SOL[m[1].toLowerCase()];rest=s.slice(m[1].length)}
+  else{
+    const m=(n==='de'?/^[A-Ha-h]/:/^[A-Ga-g]/).exec(s);if(!m)return null;
+    const U=m[0].toUpperCase();lower=n==='de'&&m[0]!==U;pc=(n==='de'?DEB:BASE)[U];rest=s.slice(1);
+    if(n==='de'){let k=0;while(k++<3){
+      if(rest.startsWith('is')){pc++;rest=rest.slice(2);continue}
+      if(U==='B'&&rest.startsWith('b')){rest=rest.slice(1);continue}
+      if((U==='E'||U==='A')&&/^s(?!us)/.test(rest)){pc--;rest=rest.slice(1);continue}
+      if(U!=='E'&&U!=='A'&&/^es(?!us)/.test(rest)){pc--;rest=rest.slice(2);continue}
+      break}}
+  }
+  let k=0;while(k++<2){if(/^[#♯]/.test(rest)){pc++;rest=rest.slice(1)}else if(/^[b♭]/.test(rest)&&!/^b\d/.test(rest)){pc--;rest=rest.slice(1)}else break}
+  return{pc:mod(pc),rest,lower};
+}
+function parseChord(tok,n){
+  const r=parseRoot(tok,n);if(!r)return null;
+  let q=r.rest,bass=null;const i=q.lastIndexOf('/');
+  if(i>=0){const b=parseRoot(q.slice(i+1),n);if(!b||!QRE.test(b.rest))return null;bass=b;q=q.slice(0,i)}
+  if(!QRE.test(q))return null;
+  const minor=r.lower||(/^(m|min|-)(?!aj)/.test(q));
+  return{pc:r.pc,q,lower:r.lower,bass,minor};
+}
+const nm=(pc,n,flat)=>NAMES[n][flat?1:0][mod(pc)];
+function keyInfo(pc,minor,flat){
+  const maj=mod(minor?pc+3:pc);
+  const T={0:[0,''],7:[1,'♯'],2:[2,'♯'],9:[3,'♯'],4:[4,'♯'],11:[5,'♯'],6:flat?[6,'♭']:[6,'♯'],1:[5,'♭'],8:[4,'♭'],3:[3,'♭'],10:[2,'♭'],5:[1,'♭']}[maj];
+  return T;
+}
+function chordOut(c,shift,nout,flat,lowerOk){
+  let q=c.q;let name=nm(c.pc+shift,nout,flat);
+  if(c.lower){if(nout==='de')name=name.toLowerCase();else if(!/^m(?!aj)/.test(q))q='m'+q}
+  let s=name+q;
+  if(c.bass)s+='/'+nm(c.bass.pc+shift,nout,flat)+c.bass.rest;
+  return s;
+}
+function transpose(text,shift,nin,nout,spell){
+  const parts=text.split(/(\s+|[|,()\[\]])/);
+  const chords=parts.map(p=>p&&!/^\s+$/.test(p)?parseChord(p,nin):null);
+  const first=chords.find(Boolean);
+  let flat=spell==='flat';
+  if(spell==='auto'&&first){const maj=mod((first.minor?first.pc+3:first.pc)+shift);flat=FLATMAJ.has(maj)}
+  const used=new Set();
+  const out=parts.map((p,i)=>{const c=chords[i];if(!c)return{t:p,ok:false};used.add(c.pc);if(c.bass)used.add(c.bass.pc);return{t:chordOut(c,shift,nout,flat),ok:true}});
+  let key=null;
+  if(first){const pc=mod(first.pc+shift);const ki=keyInfo(pc,first.minor,flat);const f2=ki[1]==='♭'||(ki[1]===''&&flat);
+    let kn=nm(pc,nout,f2);if(first.minor&&nout==='de')kn=kn.toLowerCase();
+    key={name:kn+(first.minor?'-Moll':'-Dur'),sig:ki[0]?ki[0]+' '+ki[1]:'keine Vorzeichen'}}
+  return{out,used,flat,key,any:!!first};
+}
+function ivText(d){
+  if(d===0)return'gleich notiert';const a=Math.abs(d),o=Math.floor(a/12),r=a%12;
+  let t=r?IV[r]:'';if(o)t+=(t?' + ':'')+o+' Oktave'+(o>1?'n':'');return t+(d>0?' höher':' tiefer');
+}
+function opts(sel,list){sel.innerHTML=list.map(([v,t])=>`<option value="${v}">${esc(t)}</option>`).join('')}
+opts($('from'),INS.map((x,i)=>[i,x[0]]));opts($('to'),INS.map((x,i)=>[i,x[0]]));
+opts($('nin'),Object.entries(NOT));opts($('nout'),Object.entries(NOT));
+const PRE=[['C G Am F | Dm7 G7/H C','de','Pop-Kadenz'],['B Es F7 B | g c7 F B','de','Marsch in B'],['C D E F G A H C','de','Tonleiter'],['Bb Eb F7 Bb | Gm Cm7 F7 Bb','en','englisch'],['Do Sol Lam Fa','sol','Solfège']];
+$('chips').innerHTML=PRE.map((p,i)=>`<button data-i="${i}">${esc(p[2])}</button>`).join('');
+
+function load(){let s={};try{s=JSON.parse(localStorage.getItem('transp')||'{}')}catch(e){}
+  $('from').value=s.from??0;$('to').value=s.to??2;$('nin').value=s.nin||'de';$('nout').value=s.nout||'de';
+  $('spell').value=s.spell||'auto';$('txt').value=s.txt??PRE[0][0];extra=s.extra||0}
+function save(){try{localStorage.setItem('transp',JSON.stringify({from:$('from').value,to:$('to').value,nin:$('nin').value,nout:$('nout').value,spell:$('spell').value,txt:$('txt').value,extra}))}catch(e){}}
+
+let last='';
+function render(){
+  const fi=INS[+$('from').value],ti=INS[+$('to').value],nin=$('nin').value,nout=$('nout').value,spell=$('spell').value,txt=$('txt').value;
+  const d=ti[1]-fi[1]+extra,shift=mod(d);
+  $('xv').textContent=(extra>0?'+':'')+extra+' HT';
+  const r=transpose(txt,shift,nin,nout,spell);
+  last=r.out.map(o=>o.t).join('');
+  $('rtag').textContent='Für '+ti[0].split(' (')[0];
+  $('out').innerHTML=r.any?r.out.map(o=>o.ok?`<span class="c">${esc(o.t)}</span>`:`<span class="x">${esc(o.t)}</span>`).join(''):'<span class="x">Keine Akkorde oder Töne erkannt – prüfe die Schreibweise der Eingabe.</span>';
+  $('meta').innerHTML=`<span><b>Verschiebung:</b> ${esc(ivText(d))}</span><span class="nowrap"><b>Halbtöne:</b> ${shift===0?'0':'+'+shift+' / −'+(12-shift)}</span>`+(r.key?`<span><b>Tonart:</b> ${esc(r.key.name)} (${esc(r.key.sig)})</span>`:'');
+  $('strip').innerHTML=Array.from({length:12},(_,i)=>`<div class="cell${r.used.has(i)?' on':''}"><div class="a">${esc(nm(i,nin==='sol'?'sol':nin,r.flat||nin==='de'&&[10].includes(i)))}</div><div class="ar">↓</div><div class="b">${esc(nm(i+shift,nout,r.flat))}</div></div>`).join('');
+  $('all').innerHTML=GROUPS.map(g=>{const s=mod(g[2]-mod(fi[1])+extra);const a=transpose(txt,s,nin,nout,spell);
+    return`<tr class="${g[0]===ti[2]?'me':''}"><td><b>${esc(g[1])}</b><small>${esc(g[3])}</small></td><td class="w">${esc(a.out.map(o=>o.t).join('').replace(/\s*\n\s*/g,' · '))}</td><td class="nowrap">${a.key?esc(a.key.name)+'<small>'+esc(a.key.sig)+'</small>':''}</td></tr>`}).join('');
+  save();
+}
+['from','to','nin','nout','spell'].forEach(id=>$(id).addEventListener('change',render));
+$('txt').addEventListener('input',render);
+$('up').addEventListener('click',()=>{extra=Math.min(11,extra+1);render()});
+$('dn').addEventListener('click',()=>{extra=Math.max(-11,extra-1);render()});
+$('chips').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const p=PRE[+b.dataset.i];$('txt').value=p[0];$('nin').value=p[1];render()});
+$('swap').addEventListener('click',()=>{const f=$('from').value,t=$('to').value,ni=$('nin').value,no=$('nout').value;
+  $('txt').value=last;$('from').value=t;$('to').value=f;$('nin').value=no;$('nout').value=ni;extra=-extra;
+  const o=$('out');o.classList.add('f');setTimeout(()=>o.classList.remove('f'),150);render()});
+$('copy').addEventListener('click',async()=>{const b=$('copy');try{await navigator.clipboard.writeText(last);b.textContent='Kopiert ✓'}catch(e){b.textContent='Kopieren nicht möglich'}setTimeout(()=>b.textContent='Ergebnis kopieren',1600)});
+load();render();
+}
+</script>
+</body>
+</html>

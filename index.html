@@ -17,7 +17,7 @@
 body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "Hanken Grotesk",system-ui,sans-serif;overflow-x:clip}
 .band{padding:clamp(20px,3vw,44px) max(4vw,14px)}
 .wrap{max-width:1240px;margin:auto;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.08fr);gap:clamp(20px,4vw,56px)}
-.navl{display:inline-flex;align-items:center;min-height:44px;margin-top:4px;color:var(--ink);font-weight:700;text-underline-offset:3px}
+.navs{display:flex;flex-wrap:wrap;gap:0 20px;margin-top:4px}.navl{display:inline-flex;align-items:center;min-height:40px;color:var(--ink);font-weight:700;text-underline-offset:3px}
 header{max-width:1240px;margin:0 auto 18px;display:flex;flex-wrap:wrap;gap:12px 24px;align-items:end;justify-content:space-between}
 h1{font-size:clamp(32px,4vw,46px);line-height:1.05;margin:0;font-weight:800;letter-spacing:-.02em}
 h2{font-size:21px;margin:0 0 12px;font-weight:800;letter-spacing:-.01em}
@@ -61,7 +61,7 @@ td .pl{border:0;background:none;color:var(--ink);font-size:15px;min-width:36px;m
 @media(prefers-reduced-motion:reduce){#win,#wheel .s path{transition:none}}
 </style></head><body>
 <div class="band">
-<header><div><h1>Quintenzirkel</h1><div class="sub">Tippe eine Tonart an – außen Dur, innen Moll.</div><a class="navl" href="posaune/">Posaunen-Zughelfer →</a></div><div class="tg">
+<header><div><h1>Quintenzirkel</h1><div class="sub">Tippe eine Tonart an – außen Dur, innen Moll.</div><div class="navs"><a class="navl" href="posaune/">Posaunen-Zughelfer →</a><a class="navl" href="transponieren/">Transponier-Helfer →</a></div></div><div class="tg">
 <div class="seg" role="group" aria-label="Notennamen"><button data-sys="de">Deutsch (H/B)</button><button data-sys="int">International (B/B♭)</button></div><div class="seg" role="group" aria-label="Notenschlüssel"><button data-clef="g">Violinschlüssel</button><button data-clef="f">Bassschlüssel</button></div></div></header>
 <div class="wrap">
 <div class="circ"><div class="mks" id="mks"></div><svg id="wheel" viewBox="-140 -116 880 832" role="img" aria-label="Quintenzirkel"></svg>
