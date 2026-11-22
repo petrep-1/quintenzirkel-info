@@ -5,29 +5,26 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Posaunen-Zughelfer</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/site.css">
 <style>
 /* VOICE: practical, warm practice-room companion; clear like a good method book
    IDEA: a printed brass fingering chart that comes alive — the slide itself moves
    PICTURE: large side-view of the trombone slide + bass staff, slide glides to the position
    COLOUR and TYPE: white / deep brown night, lacquer-brass yellow fields, signal red accent; Archivo 800 + Archivo
    LAYOUT: brass title band, instrument panel (staff | big position | slide), tabs: Zugtabelle, Naturtöne, Tonleitern, Quiz, Tipps */
-:root{color-scheme:light dark;--bg:light-dark(#ffffff,#17120c);--ink:light-dark(#1b1612,#f3ece2);--mut:light-dark(#6b6258,#b5a993);
---brass:light-dark(#e7ad2c,#3b2a08);--brassInk:light-dark(#1b1612,#f2c14e);--metal:light-dark(#c9921d,#d9a43a);--metal2:light-dark(#f6d27a,#8a6414);
---card:light-dark(#faf5ea,#211a11);--line:light-dark(#e6dccb,#3a3022);--acc:#d7263d;--ok:light-dark(#1f7a4a,#5fd39a)}
-:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+:root{--mut:var(--mute);--card:var(--soft);--ok:light-dark(#1f7a4a,#5fd39a)}
 *{box-sizing:border-box;min-width:0}
-body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Archivo,system-ui,sans-serif;overflow-x:clip}
-.band{padding:clamp(20px,3.5vw,48px) max(5vw,16px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "Hanken Grotesk",system-ui,sans-serif;overflow-x:clip}
+.band{padding:clamp(20px,3vw,44px) max(4vw,14px)}
 .wrap{max-width:1240px;margin:0 auto}
-header.band{background:var(--brass);color:var(--brassInk);padding-block:22px 20px}
-h1{font-weight:800;font-size:clamp(32px,5vw,48px);line-height:1.05;margin:0;text-wrap:balance}
-.back{display:inline-flex;align-items:center;min-height:44px;color:inherit;font-weight:600;text-underline-offset:3px;margin:-10px 0 2px}
-header p{margin:6px 0 0;max-width:62ch}
-h2{font-size:24px;line-height:1.15;margin:0 0 12px}
+header.band{padding-bottom:0}
+h1{font-weight:800;font-size:clamp(32px,4vw,46px);line-height:1.05;margin:0;letter-spacing:-.02em;text-wrap:balance}
+header p{margin:4px 0 0;max-width:62ch;color:var(--mute)}
+h2{font-size:21px;line-height:1.15;margin:0 0 12px;font-weight:800;letter-spacing:-.01em}
 button,select{font:inherit;color:inherit}
-.btn{min-height:44px;padding:0 16px;border-radius:10px;border:2px solid var(--ink);background:var(--bg);font-weight:600;cursor:pointer}
-.btn.pri{background:var(--ink);color:var(--bg)}
+.btn{min-height:44px;padding:0 16px;border-radius:10px;border:1.5px solid var(--line);background:var(--bg);font-weight:600;cursor:pointer}.btn:hover{border-color:var(--ink)}
+.btn.pri{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 .btn:focus-visible,.chip:focus-visible,.tab:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
 /* instrument panel */
 .panel{display:grid;grid-template-columns:minmax(0,190px) minmax(0,1fr);gap:20px 28px;align-items:center}
@@ -40,7 +37,7 @@ button,select{font:inherit;color:inherit}
 .big span{font-size:17px;font-weight:600}
 .hint{margin:6px 0 0;color:var(--mut);font-size:15px}
 .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
-.chip{min-height:44px;min-width:44px;padding:4px 12px;border-radius:10px;border:2px solid var(--line);background:var(--card);cursor:pointer;font-weight:600;display:inline-flex;align-items:center;gap:6px}
+.chip{min-height:44px;min-width:44px;padding:4px 12px;border-radius:10px;border:1.5px solid var(--line);background:var(--card);cursor:pointer;font-weight:600;display:inline-flex;align-items:center;gap:6px}
 .chip.on{border-color:var(--acc);box-shadow:inset 0 0 0 1px var(--acc)}
 .chip small{font-weight:400;color:var(--mut);font-size:13px}
 .chip.t{border-style:dashed}
@@ -51,7 +48,7 @@ button,select{font:inherit;color:inherit}
 .opts label{display:flex;align-items:center;gap:8px;min-height:44px;cursor:pointer}
 .opts input{width:20px;height:20px;accent-color:var(--acc)}
 /* tabs */
-nav.tabs{display:flex;gap:6px;overflow-x:auto;border-bottom:2px solid var(--line);padding:0 max(5vw,16px)}
+nav.tabs{max-width:1240px;margin:0 auto;display:flex;gap:6px;overflow-x:auto;border-bottom:2px solid var(--line);padding:0 max(5vw,16px)}
 .tab{flex:none;min-height:48px;padding:0 14px;border:0;background:none;font-weight:600;color:var(--mut);cursor:pointer;border-bottom:4px solid transparent;margin-bottom:-2px}
 .tab[aria-selected=true]{color:var(--ink);border-bottom-color:var(--acc)}
 section[hidden]{display:none}
@@ -83,8 +80,8 @@ td .alt{display:inline-block;margin-right:8px;font-weight:600;white-space:nowrap
 </style>
 </head>
 <body>
+<nav class="site-nav" aria-label="Seiten"><div class="in"><a class="brand" href="../">Musik-Helfer</a><div class="links"><a href=".././">Quintenzirkel</a><a href="../transponieren/">Transponieren</a><a href="../posaune/" aria-current="page">Posaune</a></div></div></nav>
 <header class="band"><div class="wrap">
-<a class="back" href="../">← Quintenzirkel</a>
 <h1>Posaunen-Zughelfer</h1>
 <p>Note antippen, Zug sehen, Ton hören. Tenorposaune in B, auf Wunsch mit Quartventil (F) und B-Notation im Violinschlüssel.</p>
 </div></header>
@@ -295,8 +292,8 @@ function show(m,chosen){S.cur=m;store.set('cur',m);const o=opts(m),v=S.valve?vop
   $('nm').textContent=gname(m)+(ALTN[m%12]?' / '+ALTN[m%12].toLowerCase():'');
   $('sci').textContent=sci(m)+' klingend'+(S.treble?' · notiert als '+gname(m+14)+' (Violinschlüssel B)':'');
   if(!c){$('pos').textContent='–';$('posTxt').textContent='ohne Quartventil nicht spielbar';$('hint').textContent='';$('alts').innerHTML='';return}
-  $('pos').textContent=c.t?tLabel(c):c.p;
-  $('posTxt').textContent=(c.t?'mit Quartventil':'. Zug')+` · ca. ${Math.round(ext(c.vis))} cm ausgezogen`;
+  $('pos').textContent=c.t?tLabel(c):c.p+'.';
+  $('posTxt').textContent=(c.t?'mit Quartventil':'Zug')+` · ca. ${Math.round(ext(c.vis))} cm ausgezogen`;
   $('hint').textContent=hintFor(c);
   $('alts').innerHTML=all.length>1?all.map((x,i)=>`<button class="chip${x===c?' on':''}${x.t?' t':''}" data-i="${i}">${x.t?tLabel(x):x.p}${mark(x)}<small>${x.n}. NT</small></button>`).join(''):'';
   $('alts').onclick=e=>{const b=e.target.closest('.chip');if(b){show(m,all[+b.dataset.i]);tone(m)}};

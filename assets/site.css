@@ -1,0 +1,15 @@
+/* Gemeinsames Design aller Seiten: Farben, Schrift, Navigation */
+:root{color-scheme:light dark;--bg:light-dark(#ffffff,#121419);--ink:light-dark(#16171b,#ecebe6);--mute:light-dark(#5b5e66,#a2a5ad);
+--line:light-dark(#dcdad4,#2f323a);--soft:light-dark(#f4f3ef,#1b1e24);--acc:light-dark(#d4432a,#ff7d61);--accbg:light-dark(#fbebe7,#3a211b);
+--flat:light-dark(#2b5bd6,#7ea4ff)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+body{font-family:"Hanken Grotesk",system-ui,sans-serif}
+.site-nav{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 92%,transparent);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.site-nav .in{max-width:1240px;margin:0 auto;padding:0 max(4vw,14px);display:flex;align-items:center;gap:0 20px;min-height:56px}
+.site-nav .brand{font-weight:800;font-size:17px;letter-spacing:-.01em;color:var(--ink);text-decoration:none;margin-right:auto;white-space:nowrap}
+.site-nav .links{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none}
+.site-nav .links a{flex:none;display:inline-flex;align-items:center;min-height:40px;padding:0 12px;border-radius:10px;color:var(--mute);font-weight:600;font-size:15px;text-decoration:none}
+.site-nav .links a:hover{color:var(--ink);background:var(--soft)}
+.site-nav .links a[aria-current=page]{color:var(--ink);background:var(--soft)}
+.site-nav a:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+@media(max-width:600px){.site-nav{position:static}.site-nav .in{flex-wrap:wrap;padding-top:8px}.site-nav .brand{width:100%;font-size:15px;color:var(--mute)}.site-nav .links{margin-inline:-12px;width:calc(100% + 24px)}}
