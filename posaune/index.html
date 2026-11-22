@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Posaunen-Zughelfer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+/* VOICE: practical, warm practice-room companion; clear like a good method book
+   IDEA: a printed brass fingering chart that comes alive — the slide itself moves
+   PICTURE: large side-view of the trombone slide + bass staff, slide glides to the position
+   COLOUR and TYPE: white / deep brown night, lacquer-brass yellow fields, signal red accent; Archivo 800 + Archivo
+   LAYOUT: brass title band, instrument panel (staff | big position | slide), tabs: Zugtabelle, Naturtöne, Tonleitern, Quiz, Tipps */
+:root{color-scheme:light dark;--bg:light-dark(#ffffff,#17120c);--ink:light-dark(#1b1612,#f3ece2);--mut:light-dark(#6b6258,#b5a993);
+--brass:light-dark(#e7ad2c,#3b2a08);--brassInk:light-dark(#1b1612,#f2c14e);--metal:light-dark(#c9921d,#d9a43a);--metal2:light-dark(#f6d27a,#8a6414);
+--card:light-dark(#faf5ea,#211a11);--line:light-dark(#e6dccb,#3a3022);--acc:#d7263d;--ok:light-dark(#1f7a4a,#5fd39a)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Archivo,system-ui,sans-serif;overflow-x:clip}
+.band{padding:clamp(20px,3.5vw,48px) max(5vw,16px)}
+.wrap{max-width:1240px;margin:0 auto}
+header.band{background:var(--brass);color:var(--brassInk);padding-block:22px 20px}
+h1{font-weight:800;font-size:clamp(32px,5vw,48px);line-height:1.05;margin:0;text-wrap:balance}
+.back{display:inline-flex;align-items:center;min-height:44px;color:inherit;font-weight:600;text-underline-offset:3px;margin:-10px 0 2px}
+header p{margin:6px 0 0;max-width:62ch}
+h2{font-size:24px;line-height:1.15;margin:0 0 12px}
+button,select{font:inherit;color:inherit}
+.btn{min-height:44px;padding:0 16px;border-radius:10px;border:2px solid var(--ink);background:var(--bg);font-weight:600;cursor:pointer}
+.btn.pri{background:var(--ink);color:var(--bg)}
+.btn:focus-visible,.chip:focus-visible,.tab:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+/* instrument panel */
+.panel{display:grid;grid-template-columns:minmax(0,190px) minmax(0,1fr);gap:20px 28px;align-items:center}
+.staff{background:var(--card);border-radius:14px;padding:6px}
+.staff svg{display:block;width:100%;height:auto;color:var(--ink)}
+.read .nm{font-size:clamp(34px,6vw,52px);font-weight:800;line-height:1}
+.read .sci{color:var(--mut);font-size:16px}
+.big{display:flex;align-items:baseline;gap:10px;margin-top:10px}
+.big b{font-size:clamp(56px,10vw,88px);line-height:.9;font-weight:800;color:var(--acc)}
+.big span{font-size:17px;font-weight:600}
+.hint{margin:6px 0 0;color:var(--mut);font-size:15px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.chip{min-height:44px;min-width:44px;padding:4px 12px;border-radius:10px;border:2px solid var(--line);background:var(--card);cursor:pointer;font-weight:600;display:inline-flex;align-items:center;gap:6px}
+.chip.on{border-color:var(--acc);box-shadow:inset 0 0 0 1px var(--acc)}
+.chip small{font-weight:400;color:var(--mut);font-size:13px}
+.chip.t{border-style:dashed}
+.ctrl{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.fig{grid-column:1/-1;background:var(--card);border-radius:14px;padding:10px 6px 4px}
+.fig>svg{display:block;width:100%;height:auto;color:var(--ink)}
+.opts{display:flex;flex-wrap:wrap;gap:8px 20px;margin-top:14px;font-size:15px}
+.opts label{display:flex;align-items:center;gap:8px;min-height:44px;cursor:pointer}
+.opts input{width:20px;height:20px;accent-color:var(--acc)}
+/* tabs */
+nav.tabs{display:flex;gap:6px;overflow-x:auto;border-bottom:2px solid var(--line);padding:0 max(5vw,16px)}
+.tab{flex:none;min-height:48px;padding:0 14px;border:0;background:none;font-weight:600;color:var(--mut);cursor:pointer;border-bottom:4px solid transparent;margin-bottom:-2px}
+.tab[aria-selected=true]{color:var(--ink);border-bottom-color:var(--acc)}
+section[hidden]{display:none}
+table{border-collapse:collapse;width:100%}
+th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:middle}
+th{font-size:13px;color:var(--mut);font-weight:600}
+tr.row{cursor:pointer}tr.row:hover td{background:var(--card)}
+tr.row.sel td{background:color-mix(in srgb,var(--acc) 12%,transparent)}
+td.nt{padding-block:2px;line-height:0}.mini{display:block;color:var(--ink);overflow:visible}
+td.z{font-size:22px;font-weight:800;color:var(--acc);white-space:nowrap}
+td .s{color:var(--mut);font-size:13px;display:block}
+td .alt{display:inline-block;margin-right:8px;font-weight:600;white-space:nowrap}
+.legend{color:var(--mut);font-size:14px;margin-top:10px}
+.grid7{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.ser{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px}
+.ser .chip{flex-direction:column;align-items:flex-start;padding:8px 12px}
+.ser .chip b{font-size:22px}
+.quiz{display:grid;grid-template-columns:minmax(0,220px) minmax(0,1fr);gap:20px;align-items:start}
+.ans{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;margin-top:10px}
+.ans .chip{justify-content:center;font-size:20px;padding:0}
+.ans .chip.right{background:var(--ok);color:var(--bg);border-color:var(--ok)}
+.ans .chip.wrong{background:var(--acc);color:#fff;border-color:var(--acc)}
+.score{font-size:15px;color:var(--mut)}
+.fb{min-height:52px;margin:12px 0;font-weight:600}
+.tips{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:16px 32px;max-width:1100px}
+.tips h3{margin:0 0 4px;font-size:18px}.tips p{margin:0}
+.lad li{margin-bottom:4px}
+@media(max-width:600px){.panel{grid-template-columns:minmax(0,130px) minmax(0,1fr);gap:14px}.quiz{grid-template-columns:minmax(0,1fr)}.quiz .staff{max-width:200px}table{font-size:14px}th,td{padding:6px 4px}}
+</style>
+</head>
+<body>
+<header class="band"><div class="wrap">
+<a class="back" href="../">← Quintenzirkel</a>
+<h1>Posaunen-Zughelfer</h1>
+<p>Note antippen, Zug sehen, Ton hören. Tenorposaune in B, auf Wunsch mit Quartventil (F) und B-Notation im Violinschlüssel.</p>
+</div></header>
+
+<main>
+<div class="band"><div class="wrap">
+<div class="panel">
+<div class="staff" id="staff" aria-label="Notenzeile"></div>
+<div class="read">
+<div class="nm" id="nm"></div>
+<div class="sci" id="sci"></div>
+<div class="big"><b id="pos"></b><span id="posTxt"></span></div>
+<p class="hint" id="hint"></p>
+<div class="chips" id="alts"></div>
+<div class="ctrl">
+<button class="btn" id="prev" aria-label="Halbton tiefer">◀ tiefer</button>
+<button class="btn pri" id="play">▶ Ton anhören</button>
+<button class="btn" id="next" aria-label="Halbton höher">höher ▶</button>
+</div>
+</div>
+<div class="fig" id="fig" aria-label="Zugstellung der Posaune"><svg id="slide" viewBox="0 0 1000 285" role="img" aria-label="Posaune, Zug in aktueller Position"></svg></div>
+</div>
+<div class="opts">
+<label><input type="checkbox" id="oValve"> Meine Posaune hat ein Quartventil</label>
+<label><input type="checkbox" id="oPed"> Pedaltöne zeigen</label>
+<label><input type="checkbox" id="oTreble"> Noten im Violinschlüssel in B lesen</label>
+<label><input type="checkbox" id="oMute"> Ton aus</label>
+</div>
+</div></div>
+
+<nav class="tabs" role="tablist">
+<button class="tab" role="tab" data-t="zugtabelle">Zugtabelle</button>
+<button class="tab" role="tab" data-t="naturtoene">Naturtöne</button>
+<button class="tab" role="tab" data-t="tonleitern">Tonleitern</button>
+<button class="tab" role="tab" data-t="quiz">Quiz</button>
+<button class="tab" role="tab" data-t="tipps">Tipps</button>
+</nav>
+
+<section class="band" id="t-zugtabelle"><div class="wrap">
+<h2>Zugtabelle</h2>
+<table><thead><tr><th>Ton</th><th>Note</th><th>Zug</th><th>Alternativen</th><th id="thT">Quartventil</th></tr></thead><tbody id="tbl"></tbody></table>
+<p class="legend"><b>k</b> = Ton liegt etwas tief, Zug leicht einziehen · <b>K</b> = 7. Naturton, deutlich tief, Zug etwa eine halbe Position kürzer · <b>T</b> = mit gedrücktem Quartventil.</p>
+</div></section>
+
+<section class="band" id="t-naturtoene" hidden><div class="wrap">
+<h2>Naturtonreihe pro Zug</h2>
+<p class="hint" style="margin-bottom:12px">Ohne den Zug zu bewegen, spielst du nur mit der Lippenspannung diese Töne. Ideal für Bindeübungen (Lip Slurs).</p>
+<div class="grid7" id="serPos"></div>
+<div class="ser" id="ser"></div>
+</div></section>
+
+<section class="band" id="t-tonleitern" hidden><div class="wrap">
+<h2>Tonleitern mit Zügen</h2>
+<div class="grid7" id="keys"></div>
+<div class="ctrl" style="margin:0 0 16px"><button class="btn" id="oct">Oktave höher</button><button class="btn pri" id="scPlay">▶ Tonleiter abspielen</button></div>
+<div class="ser" id="scale"></div>
+</div></section>
+
+<section class="band" id="t-quiz" hidden><div class="wrap">
+<h2>Quiz: Welcher Zug?</h2>
+<div class="quiz">
+<div class="staff" id="qStaff"></div>
+<div>
+<div class="opts" style="margin-top:0">
+<label>Stufe <select id="lvl" class="btn" style="min-height:44px">
+<option value="a">Einsteiger (f bis f′)</option><option value="b">Mittel (E bis b′)</option><option value="c">Alles (E bis f″)</option></select></label>
+<label><input type="checkbox" id="qName"> Notennamen zeigen</label>
+</div>
+<div class="ans" id="ans"></div>
+<p class="fb" id="fb" aria-live="polite"></p>
+<div class="ctrl" style="margin-top:0"><button class="btn" id="qPlay">▶ Ton</button><button class="btn pri" id="qNext">Nächste Note</button></div>
+<p class="score" id="score"></p>
+</div>
+</div>
+</div></section>
+
+<section class="band" id="t-tipps" hidden><div class="wrap">
+<h2>Tipps zum Zug</h2>
+<div class="tips">
+<div><h3>Orientierung am Instrument</h3><p>1. Zug: ganz geschlossen, aber locker. 3. Zug: Hand kurz vor dem Schallstückrand. 4. Zug: Hand auf Höhe des Schallstückrands. 5. Zug: knapp dahinter. 6. Zug: Arm fast gestreckt. 7. Zug: Arm ganz gestreckt, Finger an der Zugstange.</p></div>
+<div><h3>Abstände wachsen</h3><p>Jede Position liegt ein Stück weiter als die vorige: von 1 nach 2 sind es etwa 8 cm, von 6 nach 7 schon über 10 cm. Die Grafik oben ist maßstabsgetreu.</p></div>
+<div><h3>Intonation über das Ohr</h3><p>Der 5. Naturton (z. B. d′ auf 1) ist leicht tief, der 7. deutlich. Deshalb gibt es Hinweise wie „k“ und „K“. Am Ende entscheidet immer das Ohr, nicht die Markierung.</p></div>
+<div><h3>Alternativzüge nutzen</h3><p>Schnelle Wechsel wie zwischen f und b (klein) gehen auf 6–5 oder mit Quartventil auf T1–1 viel leichter als auf 1–1 mit großem Sprung. Wer weite Wege spart, spielt sauberer.</p></div>
+<div><h3>Lockerer Arm</h3><p>Den Zug mit Daumen und zwei Fingern führen, Bewegung aus Ellbogen und Handgelenk. Der Zug wandert schnell und kurz vor dem Ton, nicht während des Tons.</p></div>
+<div><h3>Kleiner Übungsplan</h3><ul class="lad" style="margin:0;padding-left:18px"><li>5 min Naturtöne auf 1 bis 7 binden</li><li>5 min Tonleitern B, Es, F und As (Blasmusik-Tonarten)</li><li>5 min Quiz auf Stufe „Mittel“</li><li>Dann Stücke aus dem Vereinsprogramm</li></ul></div>
+</div>
+</div></section>
+</main>
+
+<script>
+{
+const NAMES=['C','Des','D','Es','E','F','Fis','G','As','A','B','H'];
+const ALTN=['','Cis','','Dis','','','Ges','','Gis','','Ais',''];
+const EN=['C','C♯','D','E♭','E','F','F♯','G','A♭','A','B♭','B'];
+const LET=[0,1,1,2,2,3,3,4,5,5,6,6], ACC=['','♭','','♭','','','♯','','♭','','♭',''];
+const P=[1,2,3,4,5,6,7,8,9,10,12];
+const $=id=>document.getElementById(id);
+const store={get(k,d){try{const v=localStorage.getItem('pos.'+k);return v===null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem('pos.'+k,JSON.stringify(v))}catch(e){}}};
+const S={valve:store.get('valve',false),ped:store.get('ped',false),treble:store.get('treble',false),cur:store.get('cur',46),mute:store.get('mute',false)};
+
+const gname=m=>{const pc=m%12,o=Math.floor(m/12)-1,n=NAMES[pc];
+  if(o<=0)return '₂'+n; if(o===1)return '₁'+n; if(o===2)return n;
+  return n.toLowerCase()+['','′','″','‴'][o-3]};
+const sci=m=>EN[m%12]+(Math.floor(m/12)-1);
+const ext=p=>137.5*(2**((p-1)/12)-1);
+const posEq=k=>1+12*Math.log2(1+2**(5/12)*(2**(k/12)-1));
+const fmt=x=>(Math.round(x*10)/10).toString().replace('.',',');
+
+function opts(m){const r=[];
+  for(let p=1;p<=7;p++){const f=34-(p-1);
+    for(const n of P){if(n===1&&!S.ped)continue;if(n===7&&p===1)continue;
+      const e=f+12*Math.log2(n);if(Math.round(e)!==m)continue;
+      r.push({p,n,dev:Math.round((e-m)*100),vis:n===7?p-.55:(e-m<-.1?p-.15:p)})}}
+  return r}
+function vopts(m){const r=[];if(m>60)return r;
+  for(let k=0;k<=5;k++)for(const n of [2,3,4,5,6]){const e=29-k+12*Math.log2(n);
+    if(Math.round(e)===m){const pe=posEq(k);r.push({t:true,k,n,pos:pe,vis:Math.min(pe,7.4),dev:Math.round((e-m)*100)})}}
+  return r}
+const std=o=>o.filter(x=>x.n!==7)[0]||o[0];
+const mark=o=>o.n===7?'<sup>K</sup>':(o.dev<=-10?'<sup>k</sup>':'');
+const tLabel=v=>v.k===0?'T1':'T≈'+fmt(v.pos);
+function hintFor(o){if(!o)return '';if(o.t)return o.pos>7.05?'Ganz außen, evtl. Stimmzug am Ventil etwas ziehen.':'Quartventil drücken, Zug etwas weiter als die normale Position.';
+  if(o.n===7)return '7. Naturton: deutlich zu tief, Zug ca. eine halbe Position kürzer nehmen.';
+  if(o.dev<=-10)return o.n+'. Naturton: etwas tief, Zug leicht einziehen.';
+  if(o.n===1)return 'Pedalton (Grundton): viel Luft, Lippen ganz locker.';return o.n+'. Naturton von Zug '+o.p+'.'}
+
+/* notation */
+function staffSVG(m){
+  const tr=S.treble, w=tr?m+14:m, pc=w%12, o=Math.floor(w/12)-1, st=LET[pc]+7*o, base=tr?30:18;
+  const y=s=>130-(s-base)*6, ny=y(st), x=118;let L='';
+  for(let i=0;i<5;i++)L+=`<line x1="8" x2="182" y1="${130-i*12}" y2="${130-i*12}"/>`;
+  for(let s=base+10;s<=st;s+=2)if((s-base)%2===0)L+=`<line x1="${x-14}" x2="${x+14}" y1="${y(s)}" y2="${y(s)}"/>`;
+  for(let s=base-2;s>=st;s-=2)L+=`<line x1="${x-14}" x2="${x+14}" y1="${y(s)}" y2="${y(s)}"/>`;
+  const clef=tr?`<path d="M30 148c-7 2-9-8-2-9 6 0 7 9 0 12-6 2-4-5-4-8L32 58c1-12 13-10 9 4-4 14-24 26-24 44 0 18 30 18 30 2 0-12-17-13-18-1-1 8 7 11 10 9" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>`
+   :`<circle cx="20" cy="94" r="5" fill="currentColor"/><path d="M16 94C14 80 36 76 42 90 48 106 32 124 12 134" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/><circle cx="50" cy="88" r="2.6" fill="currentColor"/><circle cx="50" cy="100" r="2.6" fill="currentColor"/>`;
+  const acc=ACC[pc]?`<text x="${x-24}" y="${ny+7}" font-size="22" text-anchor="middle" fill="currentColor">${ACC[pc]}</text>`:'';
+  return `<svg viewBox="0 -20 190 240" role="img" aria-label="${gname(m)}"><g stroke="currentColor" stroke-width="1.3">${L}</g>${clef}${acc}
+   <ellipse cx="${x}" cy="${ny}" rx="8.5" ry="6" fill="none" stroke="currentColor" stroke-width="3.2" transform="rotate(-18 ${x} ${ny})"/>
+   <text x="186" y="214" font-size="12" text-anchor="end" fill="currentColor" opacity=".6">${tr?'notiert in B':'klingend'}</text></svg>`}
+
+function miniStaff(m){
+  const tr=S.treble,w=tr?m+14:m,pc=w%12,o=Math.floor(w/12)-1,st=LET[pc]+7*o,base=tr?30:18,y=s=>130-(s-base)*6,ny=y(st),x=104;let L='';
+  for(let i=0;i<5;i++)L+=`<line x1="4" x2="140" y1="${130-i*12}" y2="${130-i*12}"/>`;
+  for(let s=base+10;s<=st;s+=2)L+=`<line x1="${x-13}" x2="${x+13}" y1="${y(s)}" y2="${y(s)}"/>`;
+  for(let s=base-2;s>=st;s-=2)L+=`<line x1="${x-13}" x2="${x+13}" y1="${y(s)}" y2="${y(s)}"/>`;
+  const clef=tr?`<path d="M30 148c-7 2-9-8-2-9 6 0 7 9 0 12-6 2-4-5-4-8L32 58c1-12 13-10 9 4-4 14-24 26-24 44 0 18 30 18 30 2 0-12-17-13-18-1-1 8 7 11 10 9" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>`
+   :`<circle cx="20" cy="94" r="5" fill="currentColor"/><path d="M16 94C14 80 36 76 42 90 48 106 32 124 12 134" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/><circle cx="50" cy="88" r="2.6" fill="currentColor"/><circle cx="50" cy="100" r="2.6" fill="currentColor"/>`;
+  const top=Math.min(ny,tr?52:82)-14,bot=Math.max(ny,tr?152:136)+12,h=bot-top;
+  const acc=ACC[pc]?`<text x="${x-22}" y="${ny+7}" font-size="22" text-anchor="middle" fill="currentColor">${ACC[pc]}</text>`:'';
+  return `<svg class="mini" viewBox="0 ${top} 146 ${h}" width="${Math.round(146*.5)}" height="${Math.round(h*.5)}" aria-hidden="true"><g stroke="currentColor" stroke-width="1.4">${L}</g>${clef}${acc}<ellipse cx="${x}" cy="${ny}" rx="8.5" ry="6" fill="none" stroke="currentColor" stroke-width="3.2" transform="rotate(-18 ${x} ${ny})"/></svg>`}
+
+/* slide picture: fixed viewBox, 1 cm = 6.25 units, x=0 cm at mouthpiece receiver */
+const U=6.25,X=c=>(170+c*U).toFixed(1),H0=10;/* handle sits 10 cm in front of receiver in 1st position */
+const tube=(a,b,y,h,f)=>`<rect x="${X(a)}" y="${y-h/2}" width="${((b-a)*U).toFixed(1)}" height="${h}" fill="url(#${f})"/>`;
+const bend=(d,w)=>`<path d="${d}" fill="none" stroke="#b47a1c" stroke-width="${w}"/><path d="${d}" fill="none" stroke="#f7dc96" stroke-width="${w/3}" opacity=".75" transform="translate(0 -${w/5})"/>`;
+function drawSlide(){let t='';
+  for(let p=1;p<=7;p++){const x=X(H0+ext(p));t+=`<line x1="${x}" x2="${x}" y1="226" y2="240" stroke="currentColor" stroke-width="2"/><text x="${x}" y="272" font-size="32" font-weight="600" text-anchor="middle" fill="currentColor" data-p="${p}">${p}</text>`}
+  $('slide').innerHTML=`<defs>
+   <linearGradient id="br" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7a4e0e"/><stop offset=".3" stop-color="#f8df98"/><stop offset=".55" stop-color="#dca23a"/><stop offset="1" stop-color="#6e440b"/></linearGradient>
+   <linearGradient id="ni" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5d6064"/><stop offset=".3" stop-color="#f4f6f8"/><stop offset=".6" stop-color="#b9bdc2"/><stop offset="1" stop-color="#55585c"/></linearGradient>
+   <linearGradient id="bl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8a5a12"/><stop offset=".28" stop-color="#f6d685"/><stop offset=".5" stop-color="#e2a940"/><stop offset=".8" stop-color="#a86f18"/><stop offset="1" stop-color="#6a420b"/></linearGradient>
+   <radialGradient id="mo" cx=".35" cy=".5" r=".7"><stop offset="0" stop-color="#1e1204"/><stop offset=".7" stop-color="#5a3a0a"/><stop offset="1" stop-color="#b07a20"/></radialGradient></defs>
+  <ellipse cx="560" cy="214" rx="430" ry="9" fill="currentColor" opacity=".07"/>
+  ${bend(`M${X(-22)} 80 A17.5 17.5 0 0 0 ${X(-22)} 115`,10)}
+  ${tube(-22,12,80,10,'br')}${tube(-22,-8,115,10,'br')}
+  ${bend(`M${X(-8)} 115 C${X(-1)} 115 ${X(-1)} 168 ${X(5)} 168`,9)}
+  <rect x="${X(3.4)}" y="86" width="5" height="78" rx="2" fill="url(#ni)"/>
+  <path d="M${X(12)} 75 C${X(25)} 74 ${X(32)} 62 ${X(36)} 12 L${X(36)} 148 C${X(32)} 98 ${X(25)} 86 ${X(12)} 85 Z" fill="url(#bl)"/>
+  <ellipse cx="${X(36)}" cy="80" rx="10" ry="68" fill="#6e440b"/><ellipse cx="${X(36)+2}" cy="80" rx="6.5" ry="62" fill="url(#mo)"/>
+  <ellipse cx="${X(36)}" cy="80" rx="10" ry="68" fill="none" stroke="#f8df98" stroke-width="2.5"/>
+  <text x="${+X(36)+18}" y="36" font-size="24" fill="currentColor" opacity=".7">Schallstückrand</text>
+  ${tube(0,68,168,6,'ni')}${tube(0,68,196,6,'ni')}
+  <rect x="${X(2)}" y="164" width="7" height="36" rx="2" fill="url(#ni)"/>
+  ${tube(-6,0,196,8,'ni')}<ellipse cx="${X(-6.2)}" cy="196" rx="4" ry="13" fill="#d6d9dd" stroke="#6d7074" stroke-width="2"/>
+  <g id="outer">
+   ${tube(9,70,168,10,'br')}${tube(9,70,196,10,'br')}${tube(9,11,168,13,'br')}${tube(9,11,196,13,'br')}${tube(63,70,168,12,'br')}${tube(63,70,196,12,'br')}
+   ${bend(`M${X(70)} 168 A14 14 0 0 1 ${X(70)} 196`,11)}
+   <rect x="${+X(70)+10}" y="200" width="6" height="12" rx="2" fill="url(#ni)" transform="rotate(-25 ${+X(70)+13} 206)"/>
+   <rect x="${+X(H0)-4}" y="164" width="8" height="36" rx="2" fill="url(#br)"/>
+   <rect x="${+X(H0)-7}" y="173" width="14" height="18" rx="4" fill="url(#br)" stroke="#7a4e0e" stroke-width="1.5"/>
+   <line x1="${X(H0)}" x2="${X(H0)}" y1="206" y2="234" stroke="var(--acc)" stroke-width="4" stroke-linecap="round"/>
+  </g>
+  <line x1="${X(H0)}" x2="${X(H0+ext(7))}" y1="233" y2="233" stroke="currentColor" opacity=".45" stroke-width="2"/>${t}`}
+drawSlide();
+let curVis=1,curDx=0,raf=0;const still=matchMedia('(prefers-reduced-motion: reduce)');
+function setSlide(v,animate=true){curVis=v;const g=$('outer');if(!g)return;const to=ext(v)*U,from=curDx;cancelAnimationFrame(raf);
+  const put=d=>{curDx=d;g.setAttribute('transform',`translate(${d.toFixed(2)} 0)`)};
+  if(!animate||still.matches||Math.abs(to-from)<.5)put(to);
+  else{const t0=performance.now(),D=Math.min(650,250+Math.abs(to-from)*1.2);
+    const step=t=>{const k=Math.min(1,(t-t0)/D),e=1-(1-k)**3;put(from+(to-from)*e);if(k<1)raf=requestAnimationFrame(step)};raf=requestAnimationFrame(step)}
+  document.querySelectorAll('#slide text[data-p]').forEach(t=>{const on=Math.round(v)==+t.dataset.p;t.setAttribute('font-weight',on?'800':'600');t.setAttribute('fill',on?'var(--acc)':'currentColor')})}
+
+/* audio */
+let ac;function tone(m,d=.9){if(S.mute)return;try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();if(ac.state==='suspended')ac.resume();
+  const f=440*2**((m-69)/12),t=ac.currentTime,o1=ac.createOscillator(),o2=ac.createOscillator(),fl=ac.createBiquadFilter(),g=ac.createGain();
+  o1.type='sawtooth';o2.type='square';o1.frequency.value=f;o2.frequency.value=f*1.003;fl.type='lowpass';fl.Q.value=2;
+  fl.frequency.setValueAtTime(f*1.5,t);fl.frequency.linearRampToValueAtTime(Math.min(f*7,6000),t+.08);fl.frequency.linearRampToValueAtTime(f*4,t+d);
+  g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.22,t+.05);g.gain.setValueAtTime(.18,t+d-.1);g.gain.linearRampToValueAtTime(0,t+d+.08);
+  const g2=ac.createGain();g2.gain.value=.35;o1.connect(fl);o2.connect(g2).connect(fl);fl.connect(g).connect(ac.destination);
+  o1.start(t);o2.start(t);o1.stop(t+d+.1);o2.stop(t+d+.1)}catch(e){}}
+
+/* main view */
+const lo=()=>S.ped?28:(S.valve?36:40), hi=77;
+let pick=null;
+function show(m,chosen){S.cur=m;store.set('cur',m);const o=opts(m),v=S.valve?vopts(m):[];
+  const all=[...o,...v],c=chosen||std(o)||v[0];pick=c;
+  $('staff').innerHTML=staffSVG(m);
+  $('nm').textContent=gname(m)+(ALTN[m%12]?' / '+ALTN[m%12].toLowerCase():'');
+  $('sci').textContent=sci(m)+' klingend'+(S.treble?' · notiert als '+gname(m+14)+' (Violinschlüssel B)':'');
+  if(!c){$('pos').textContent='–';$('posTxt').textContent='ohne Quartventil nicht spielbar';$('hint').textContent='';$('alts').innerHTML='';return}
+  $('pos').textContent=c.t?tLabel(c):c.p;
+  $('posTxt').textContent=(c.t?'mit Quartventil':'. Zug')+` · ca. ${Math.round(ext(c.vis))} cm ausgezogen`;
+  $('hint').textContent=hintFor(c);
+  $('alts').innerHTML=all.length>1?all.map((x,i)=>`<button class="chip${x===c?' on':''}${x.t?' t':''}" data-i="${i}">${x.t?tLabel(x):x.p}${mark(x)}<small>${x.n}. NT</small></button>`).join(''):'';
+  $('alts').onclick=e=>{const b=e.target.closest('.chip');if(b){show(m,all[+b.dataset.i]);tone(m)}};
+  setSlide(c.vis);
+  document.querySelectorAll('tr.row').forEach(r=>r.classList.toggle('sel',+r.dataset.m===m))}
+$('prev').onclick=()=>{if(S.cur>lo()){show(S.cur-1);tone(S.cur)}};
+$('next').onclick=()=>{if(S.cur<hi){show(S.cur+1);tone(S.cur)}};
+$('play').onclick=()=>tone(S.cur);
+
+/* table */
+function table(){$('thT').style.display=S.valve?'':'none';let h='';
+  for(let m=hi;m>=lo();m--){const o=opts(m),v=S.valve?vopts(m):[],s=std(o);
+    if(!s&&!v.length)continue;
+    const alts=o.filter(x=>x!==s).map(x=>`<span class="alt">${x.p}${mark(x)}</span>`).join('')||(s?'':'<span class="s">nur mit Ventil</span>');
+    h+=`<tr class="row" data-m="${m}"><td><b>${gname(m)}</b><span class="s">${sci(m)}${S.treble?' · notiert '+gname(m+14):''}</span></td><td class="nt">${miniStaff(m)}</td><td class="z">${s?s.p+mark(s):'–'}</td><td>${alts}</td>${S.valve?`<td>${v.map(x=>`<span class="alt">${tLabel(x)}</span>`).join('')}</td>`:''}</tr>`}
+  $('tbl').innerHTML=h}
+$('tbl').onclick=e=>{const r=e.target.closest('tr.row');if(r){show(+r.dataset.m);tone(+r.dataset.m);window.scrollTo({top:0,behavior:matchMedia('(prefers-reduced-motion:reduce)').matches?'auto':'smooth'})}};
+
+/* harmonic series */
+let serP=store.get('serP',1);
+function series(){$('serPos').innerHTML=[1,2,3,4,5,6,7].map(p=>`<button class="chip${p===serP?' on':''}" data-p="${p}">Zug ${p}</button>`).join('');
+  const f=34-(serP-1);
+  $('ser').innerHTML=P.filter(n=>n<=10||n===12).map(n=>{const e=f+12*Math.log2(n),m=Math.round(e),d=Math.round((e-m)*100);
+    const note=n===7?'deutlich tief':n===1?'Pedalton':(d<=-10?'etwas tief':(n===11?'':'sauber'));
+    return m<=hi?`<button class="chip" data-m="${m}" data-n="${n}"><small>${n}. Naturton</small><b>${gname(m)}</b><small>${note}</small></button>`:''}).join('')}
+$('serPos').onclick=e=>{const b=e.target.closest('.chip');if(b){serP=+b.dataset.p;store.set('serP',serP);series()}};
+$('ser').onclick=e=>{const b=e.target.closest('.chip');if(!b)return;const m=+b.dataset.m,n=+b.dataset.n;
+  const o=opts(m).find(x=>x.p===serP&&x.n===n)||{p:serP,n,dev:n===7?-31:0,vis:serP};show(m,o);tone(m)};
+
+/* scales */
+const KEYS=[['B-Dur',46],['Es-Dur',51],['F-Dur',53],['As-Dur',44],['C-Dur',48],['G-Dur',43]];
+let key=store.get('key',0),up=false,scT=[];
+const scNotes=()=>{const t=KEYS[key][1]+(up?12:0);return [0,2,4,5,7,9,11,12].map(i=>t+i)};
+function scales(){$('keys').innerHTML=KEYS.map((k,i)=>`<button class="chip${i===key?' on':''}" data-k="${i}">${k[0]}</button>`).join('');
+  const ok=KEYS[key][1]+24<=hi;$('oct').disabled=!ok&&!up;$('oct').textContent=up?'Oktave tiefer':'Oktave höher';
+  $('scale').innerHTML=scNotes().map((m,i)=>{const s=std(opts(m));return `<button class="chip" data-m="${m}" data-i="${i}"><small>${i+1}. Stufe</small><b>${gname(m)}</b><small>Zug ${s?s.p:'–'}${s?mark(s):''}</small></button>`}).join('')}
+$('keys').onclick=e=>{const b=e.target.closest('.chip');if(b){key=+b.dataset.k;store.set('key',key);up=false;scales()}};
+$('oct').onclick=()=>{up=!up;scales()};
+$('scale').onclick=e=>{const b=e.target.closest('.chip');if(b){show(+b.dataset.m);tone(+b.dataset.m)}};
+$('scPlay').onclick=()=>{scT.forEach(clearTimeout);scT=[];const ns=scNotes(),seq=[...ns,...ns.slice(0,-1).reverse()];
+  const cs=[...$('scale').children];
+  seq.forEach((m,i)=>scT.push(setTimeout(()=>{show(m);tone(m,.5);cs.forEach(c=>c.classList.toggle('on',+c.dataset.m===m))},i*620)));
+  scT.push(setTimeout(()=>cs.forEach(c=>c.classList.remove('on')),seq.length*620))};
+
+/* quiz */
+const LV={a:[53,65],b:[40,70],c:[40,77]};
+let q=null,done=false,sc0=store.get('quiz',{r:0,n:0,best:0}),streak=0;
+$('lvl').value=store.get('lvl','a');$('qName').checked=store.get('qName',false);
+$('ans').innerHTML=[1,2,3,4,5,6,7].map(p=>`<button class="chip" data-p="${p}">${p}</button>`).join('');
+function nextQ(){const [a,b]=LV[$('lvl').value];let m;do{m=a+Math.floor(Math.random()*(b-a+1))}while(!std(opts(m))||m===q);
+  q=m;done=false;$('qStaff').innerHTML=staffSVG(m)+($('qName').checked?`<div style="text-align:center;font-weight:800;font-size:22px">${gname(m)}</div>`:'');
+  $('fb').textContent='Tippe den Zug an.';[...$('ans').children].forEach(c=>c.className='chip');score()}
+function score(){$('score').textContent=`Richtig: ${sc0.r} von ${sc0.n} · Serie: ${streak} · Beste Serie: ${sc0.best}`}
+$('ans').onclick=e=>{const b=e.target.closest('.chip');if(!b||done)return;done=true;const p=+b.dataset.p,o=opts(q),hit=o.find(x=>x.p===p),s=std(o);
+  sc0.n++;if(hit){sc0.r++;streak++;sc0.best=Math.max(sc0.best,streak)}else streak=0;store.set('quiz',sc0);
+  [...$('ans').children].forEach(c=>{const pp=+c.dataset.p;if(o.some(x=>x.p===pp))c.classList.add('right');else if(pp===p)c.classList.add('wrong')});
+  const others=o.filter(x=>x!==s).map(x=>x.p+(x.n===7?' (kurz)':'')).join(', ');
+  $('fb').textContent=(hit?(hit.n===7?'Geht, aber deutlich kürzer nehmen! ':'Richtig! '):'Leider nein. ')+`${gname(q)} = Zug ${s.p}`+(others?`, alternativ ${others}.`:'.');
+  tone(q);score()};
+$('qNext').onclick=nextQ;$('qPlay').onclick=()=>q&&tone(q);
+$('lvl').onchange=()=>{store.set('lvl',$('lvl').value);nextQ()};
+$('qName').onchange=()=>{store.set('qName',$('qName').checked);const k=q;q=null;if(!done){q=k;$('qStaff').innerHTML=staffSVG(k)+($('qName').checked?`<div style="text-align:center;font-weight:800;font-size:22px">${gname(k)}</div>`:'')}else{q=k}};
+
+/* options */
+const oV=$('oValve'),oP=$('oPed'),oT=$('oTreble');oV.checked=S.valve;oP.checked=S.ped;oT.checked=S.treble;
+function refresh(){if(S.cur<lo())S.cur=lo();table();show(S.cur);scales();if(q){const k=q;$('qStaff').innerHTML=staffSVG(k)+($('qName').checked?`<div style="text-align:center;font-weight:800;font-size:22px">${gname(k)}</div>`:'')}}
+oV.onchange=()=>{S.valve=oV.checked;store.set('valve',S.valve);refresh()};
+oP.onchange=()=>{S.ped=oP.checked;store.set('ped',S.ped);refresh();series()};
+oT.onchange=()=>{S.treble=oT.checked;store.set('treble',S.treble);refresh()};
+const oM=$('oMute');oM.checked=S.mute;
+const muteUI=()=>{['play','qPlay'].forEach(i=>{$(i).disabled=S.mute;$(i).style.opacity=S.mute?.4:1});$('scPlay').textContent=S.mute?'▶ Tonleiter zeigen':'▶ Tonleiter abspielen'};
+oM.onchange=()=>{S.mute=oM.checked;store.set('mute',S.mute);muteUI()};muteUI();
+
+/* tabs */
+const TABS=['zugtabelle','naturtoene','tonleitern','quiz','tipps'];
+function route(){const h=location.hash.slice(1),t=TABS.includes(h)?h:'zugtabelle';
+  document.querySelectorAll('.tab').forEach(b=>b.setAttribute('aria-selected',b.dataset.t===t));
+  TABS.forEach(x=>$('t-'+x).hidden=x!==t);if(t==='quiz'&&!q)nextQ()}
+document.querySelector('nav.tabs').onclick=e=>{const b=e.target.closest('.tab');if(b)location.hash=b.dataset.t};
+addEventListener('hashchange',route);
+addEventListener('keydown',e=>{if(e.target.closest('input,select'))return;if(e.key==='ArrowLeft')$('prev').click();if(e.key==='ArrowRight')$('next').click()});
+
+table();series();scales();show(S.cur<lo()?46:S.cur);route();score();
+}
+</script>
+</body>
+</html>
