@@ -86,7 +86,7 @@ const enName=x=>ENL[x.l]+ACC[x.a];
 const nn=x=>sys==='de'?deName(x):enName(x);
 const cr=x=>sys==='int'?enName(x):x.l===6?(x.a<0?'B'+ACC[x.a+1]:'H'+ACC[x.a]):enName(x);
 const tonic=(n,mode)=>majS(n)[mode==='dur'?0:5];
-function kName(n,mode){const t=tonic(n,mode);let s=nn(t);if(mode==='moll'&&sys==='de')s=s.toLowerCase();return s+(mode==='dur'?'-Dur':'-Moll')}
+function kName(n,mode){const t=tonic(n,mode);let s=nn(t);if(mode==='moll')s=s.toLowerCase();return s+(mode==='dur'?'-Dur':'-Moll')}
 const slug=(n,mode)=>deName(tonic(n,mode)).toLowerCase()+'-'+mode;
 const sigTxt=n=>n?Math.abs(n)+(n>0?' ♯':' ♭'):'keine';
 const sigNotes=n=>n>0?SH.slice(0,n).map(l=>note(l,NAT[l]+1)):FL.slice(0,-n).map(l=>note(l,NAT[l]-1));
