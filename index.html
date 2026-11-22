@@ -19,51 +19,51 @@ body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "Hanken Grote
 .wrap{max-width:1240px;margin:auto;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.08fr);gap:clamp(20px,4vw,56px)}
 header{max-width:1240px;margin:0 auto 18px;display:flex;flex-wrap:wrap;gap:12px 24px;align-items:end;justify-content:space-between}
 h1{font-size:clamp(32px,4vw,46px);line-height:1.05;margin:0;font-weight:800;letter-spacing:-.02em}
-h2{font-size:19px;margin:0 0 10px;font-weight:800}
+h2{font-size:21px;margin:0 0 12px;font-weight:800;letter-spacing:-.01em}
 .seg{display:inline-flex;border:1.5px solid var(--ink);border-radius:999px;overflow:hidden}
-.seg button{border:0;background:none;color:var(--ink);font:600 14px/1 inherit;padding:0 14px;min-height:40px;cursor:pointer}
+.seg button{border:0;background:none;color:var(--ink);font:600 14px/1 inherit;padding:0 14px;min-height:40px;cursor:pointer}.seg button:not([aria-pressed=true]):hover{background:var(--soft)}
 .seg button[aria-pressed=true]{background:var(--ink);color:var(--bg)}
 .circ{position:sticky;top:14px;align-self:start}
-#wheel{width:100%;max-width:680px;aspect-ratio:1;display:block;margin:auto;touch-action:manipulation}
-#wheel .s,#wheel .ks{cursor:pointer}#wheel .ks *{stroke:var(--ink)}#wheel .ks rect{stroke:none}#wheel .s path{transition:fill .25s}#wheel text{pointer-events:none;text-anchor:middle;dominant-baseline:middle;fill:var(--ink)}
+#wheel{width:100%;max-width:700px;aspect-ratio:1;display:block;margin:auto;touch-action:manipulation}
+#wheel .s,#wheel .ks{cursor:pointer}#wheel .ks *{stroke:var(--ink)}#wheel .ks rect[fill=transparent]{stroke:none}#wheel .ks:hover rect[fill=transparent]{fill:var(--soft)}#wheel .s path{transition:fill .25s}#wheel text{pointer-events:none;text-anchor:middle;dominant-baseline:middle;fill:var(--ink)}
 #wheel .s:hover path{filter:brightness(.94)}#wheel .s:focus{outline:none}#wheel .s:focus-visible path{stroke:var(--ink);stroke-width:3}
 #wheel .on path{fill:var(--ink)!important}#wheel .on text{fill:var(--bg)}
 #win{transition:transform .55s cubic-bezier(.3,.7,.2,1);transform-origin:300px 300px}
-.tg{display:flex;flex-wrap:wrap;gap:8px}.legend{font-size:14px;color:var(--mute);max-width:580px;margin:10px auto 0;text-align:center;text-wrap:balance}
-.panel>section{padding:18px 0;border-top:1px solid var(--line)}.panel>section:first-child{border:0;padding-top:0}
+.tg{display:flex;flex-wrap:wrap;gap:8px}.legend{font-size:14px;color:var(--mute);max-width:560px;margin:10px auto 0;text-align:center;text-wrap:balance}
+.panel>section{padding:24px 0;border-top:1px solid var(--line)}.panel>section:first-child{border:0;padding-top:0}
 .title{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 16px}
-.kname{font-size:clamp(36px,5vw,52px);font-weight:800;line-height:1.05;letter-spacing:-.02em}
+.kname{font-size:clamp(40px,5.5vw,60px);font-weight:800;line-height:1.05;letter-spacing:-.02em}
 .sub{color:var(--mute)}
 .btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
 .b{border:1.5px solid var(--line);background:var(--bg);color:var(--ink);font:600 15px/1.2 inherit;padding:9px 14px;min-height:44px;border-radius:10px;cursor:pointer;white-space:nowrap}
-.b:hover{border-color:var(--ink)}.b:focus-visible,.seg button:focus-visible{outline:3px solid var(--flat);outline-offset:2px}
+.b{transition:border-color .15s,background .15s}.b:hover{border-color:var(--ink);background:var(--soft)}.b.pri:hover{background:var(--ink);opacity:.88}.b:focus-visible,.seg button:focus-visible{outline:3px solid var(--flat);outline-offset:2px}
 .b.pri{background:var(--ink);color:var(--bg);border-color:var(--ink)}
-.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(125px,1fr));gap:10px;margin-top:14px}
-.facts div{background:var(--soft);border-radius:10px;padding:10px 12px}.facts span{display:block;font-size:13px;color:var(--mute)}.facts b{font-size:17px}
+.facts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:16px}
+.facts>div{background:var(--soft);border-radius:12px;padding:12px 14px}.facts span{display:block;font-size:13px;color:var(--mute);margin-bottom:2px}.facts b{font-size:20px;line-height:1.2}.facts .sub{font-size:13.5px;margin-top:4px;line-height:1.35}
 .staff{width:100%;height:auto;display:block;margin-top:8px}.staff *{stroke:var(--ink)}
 .chips{display:flex;flex-wrap:wrap;gap:4px;align-items:end}
 .chip{text-align:center;min-width:48px}.chip i{display:block;font-style:normal;font-size:13px;color:var(--mute)}
-.chip b{display:block;background:var(--soft);border-radius:8px;padding:8px 6px;font-size:17px}.chip.t b{background:var(--ink);color:var(--bg)}
+.chip b{display:block;background:var(--soft);border-radius:10px;padding:9px 6px;font-size:17px}.chip.t b{background:var(--ink);color:var(--bg)}
 .chip.alt b{box-shadow:inset 0 0 0 2px var(--sharp)}
 .step{font-size:13px;color:var(--mute);padding:0 1px 10px;align-self:end}.step.h{color:var(--sharp);font-weight:800}
 table{border-collapse:collapse;width:100%;font-size:15px}th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line)}
-th{font-size:13px;color:var(--mute);font-weight:600}td.r{font-weight:800}tbody tr{cursor:pointer}tbody tr:hover{background:var(--soft)}
+th{font-size:13px;color:var(--mute);font-weight:600}td.r{font-weight:800}tbody tr{cursor:pointer}tbody tr{transition:background .12s}tbody tr:hover{background:var(--soft)}
 td .pl{border:0;background:none;color:var(--ink);font-size:15px;min-width:36px;min-height:36px;border-radius:50%;cursor:pointer}
 .prog{display:grid;gap:8px}.prog button{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 12px;text-align:left;white-space:normal}
-.prog em{font-style:normal;color:var(--mute);font-weight:400}
+.prog button{align-items:baseline;padding:12px 14px}.prog em{font-style:normal;color:var(--mute);font-weight:400;font-size:14px;margin-left:6px}.prog .cs{font-weight:800;font-size:16px;letter-spacing:.01em}
 .note{font-size:14px;color:var(--mute);margin:8px 0 0}
 .scroll{overflow-x:auto}.fb{min-width:560px;width:100%;height:auto;display:block}
 .top{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-bottom:8px}
 @media(max-width:900px){.wrap{grid-template-columns:minmax(0,1fr)}.circ{position:static}}
-@media(max-width:600px){table{font-size:13px}.ct td .sub,.ct th:nth-child(4),.ct td:nth-child(4){display:none}th,td{padding:8px 4px}.chip{min-width:40px}.chip b{font-size:15px}}
+@media(max-width:600px){.facts{grid-template-columns:repeat(2,minmax(0,1fr))}table{font-size:13px}.ct td .sub,.ct th:nth-child(4),.ct td:nth-child(4){display:none}th,td{padding:8px 4px}.chip{min-width:40px}.chip b{font-size:15px}}
 @media(prefers-reduced-motion:reduce){#win,#wheel .s path{transition:none}}
 </style></head><body>
 <div class="band">
 <header><div><h1>Quintenzirkel</h1><div class="sub">Tippe eine Tonart an – außen Dur, innen Moll.</div></div><div class="tg">
 <div class="seg" role="group" aria-label="Notennamen"><button data-sys="de">Deutsch (H/B)</button><button data-sys="int">International (B/B♭)</button></div><div class="seg" role="group" aria-label="Notenschlüssel"><button data-clef="g">Violinschlüssel</button><button data-clef="f">Bassschlüssel</button></div></div></header>
 <div class="wrap">
-<div class="circ"><svg id="wheel" viewBox="-128 -118 856 836" role="img" aria-label="Quintenzirkel"></svg>
-<p class="legend">Am Rand: die Vorzeichen jeder Dur-Tonart (und ihrer Parallele). Der Rahmen umfasst die sechs leitereigenen Dur- und Moll-Akkorde der gewählten Tonart. Nochmals auf dieselbe Tonart tippen deutet enharmonisch um (z. B. Fis ↔ Ges).</p></div>
+<div class="circ"><svg id="wheel" viewBox="-140 -116 880 832" role="img" aria-label="Quintenzirkel"></svg>
+<p class="legend">Am Rand stehen die Vorzeichen jeder Tonart. Der Rahmen umfasst die sechs leitereigenen Dur- und Moll-Akkorde der gewählten Tonart. Nochmals auf dieselbe Tonart tippen deutet enharmonisch um (z. B. Fis ↔ Ges).</p></div>
 <div class="panel" id="panel" aria-live="polite"></div>
 </div></div>
 <script>
@@ -120,17 +120,17 @@ function fillFor(p,k){const c=p===0?0:p===6?6:p<6?p:12-p,mix=p===6?'color-mix(in
 function drawWheel(){let h='';
   for(let p=0;p<12;p++){const a=p*30,cur=pOf(st.n)===p,n=cur?st.n:prim(p),o=alt(p)!==undefined?(n===prim(p)?alt(p):prim(p)):null;
     for(const mode of['dur','moll']){const D=mode==='dur',[r1,r2]=D?[208,296]:[128,204],on=cur&&st.mode===mode;
-      const [x1,y1]=xy(D?258:170,a),[x2,y2]=xy(D?228:146,a);
-      const big=kName(n,mode).replace(/-(Dur|Moll)$/,''),small=D?sigTxt(n).replace(' ','')+(o!==null?' · '+kName(o,mode).replace(/-Dur$/,''):''):(o!==null?kName(o,mode).replace(/-Moll$/,''):'');
+      const [x1,y1]=xy(o!==null?(D?262:174):(D?252:166),a),[x2,y2]=xy(D?228:146,a);
+      const big=kName(n,mode).replace(/-(Dur|Moll)$/,''),small=o!==null?'= '+kName(o,mode).replace(/-(Dur|Moll)$/,''):'';
       h+=`<g class="s${on?' on':''}" tabindex="0" role="button" aria-label="${kName(n,mode)}" data-p="${p}" data-m="${mode}"><path d="${sec(r1,r2,a-14.4,a+14.4)}" style="fill:${fillFor(p,D?1:.6)}"/>
-      <text x="${x1}" y="${y1}" font-size="${D?(big.length>3?22:28):(big.length>3?16:20)}" font-weight="800">${big}</text>
-      <text x="${x2}" y="${y2}" font-size="${D?13:11.5}" opacity=".8">${small}</text></g>`}}
-  for(let p=0;p<12;p++){const n=pOf(st.n)===p?st.n:prim(p),w=56+Math.abs(n)*11+6,k=.7,[cx,cy]=xy(368,p*30).map(Number),on=pOf(st.n)===p;
-    h+=`<g class="ks" tabindex="-1" data-p="${p}" data-m="dur" aria-hidden="true">${on?`<rect x="${(cx-w*k/2-6).toFixed(1)}" y="${(cy-38).toFixed(1)}" width="${(w*k+12).toFixed(1)}" height="76" rx="8" fill="var(--soft)"/>`:`<rect x="${(cx-w*k/2-6).toFixed(1)}" y="${(cy-34).toFixed(1)}" width="${(w*k+12).toFixed(1)}" height="68" fill="transparent"/>`}<g transform="translate(${(cx-w*k/2).toFixed(1)} ${(cy-60*k).toFixed(1)}) scale(${k})">${sigBase(n,w)}</g></g>`}
+      <text x="${x1}" y="${y1}" font-size="${D?(big.length>3?25:32):(big.length>3?17:22)}" font-weight="800">${big}</text>
+      <text x="${x2}" y="${y2}" font-size="${D?14:12}" font-weight="600" opacity=".75">${small}</text></g>`}}
+  for(let p=0;p<12;p++){const n=pOf(st.n)===p?st.n:prim(p),w=56+Math.abs(n)*11+6,k=.78,[cx,cy]=xy(374,p*30).map(Number),on=pOf(st.n)===p;
+    h+=`<g class="ks" tabindex="-1" data-p="${p}" data-m="dur" aria-hidden="true">${on?`<rect x="${(cx-w*k/2-6).toFixed(1)}" y="${(cy-41).toFixed(1)}" width="${(w*k+12).toFixed(1)}" height="82" rx="10" fill="var(--bg)" stroke="var(--ink)" stroke-width="2"/>`:`<rect x="${(cx-w*k/2-6).toFixed(1)}" y="${(cy-34).toFixed(1)}" width="${(w*k+12).toFixed(1)}" height="68" fill="transparent"/>`}<g transform="translate(${(cx-w*k/2).toFixed(1)} ${(cy-60*k).toFixed(1)}) scale(${k})">${sigBase(n,w)}</g></g>`}
   h+=`<g id="win" style="transform:rotate(${rot}deg)"><path d="${sec(124,300,-45.5,45.5)}" fill="none" stroke="var(--ink)" stroke-width="3.5" stroke-linejoin="round"/></g>
-  <circle cx="300" cy="300" r="118" fill="var(--soft)"/><text x="300" y="276" font-size="15" opacity=".7">${st.mode==='dur'?'Dur':'Moll'}</text>
-  <text x="300" y="312" font-size="${kName(st.n,st.mode).length>8?30:38}" font-weight="800">${kName(st.n,st.mode).replace(/-(Dur|Moll)$/,'')}</text>
-  <text x="300" y="350" font-size="15" opacity=".7">${sigTxt(st.n)}</text>`;
+  <circle cx="300" cy="300" r="120" fill="var(--bg)"/><circle cx="300" cy="300" r="112" fill="var(--soft)"/><text x="300" y="258" font-size="14" font-weight="600" opacity=".65">${st.mode==='dur'?'Dur':'Moll'}</text>
+  <text x="300" y="298" font-size="${kName(st.n,st.mode).length>8?40:50}" font-weight="800">${kName(st.n,st.mode).replace(/-(Dur|Moll)$/,'')}</text>
+  <text x="300" y="338" font-size="17" font-weight="700" style="fill:${st.n>0?'var(--sharp)':st.n<0?'var(--flat)':'var(--mute)'}">${st.n?sigTxt(st.n):'ohne Vorzeichen'}</text><text x="300" y="364" font-size="13.5" opacity=".65">Parallele ${kName(st.n,st.mode==='dur'?'moll':'dur')}</text>`;
   W.innerHTML=h}
 
 /* ---- Notenzeile ---- */
@@ -172,9 +172,9 @@ function render(){const {n,mode}=st,v=mode==='dur'?'dur':variant,s=scale(n,mode,
   const rel=[['Dominanttonart',pick(n+1),mode],['Subdominanttonart',pick(n-1),mode],['Paralleltonart',n,par],['Varianttonart',mode==='dur'?pick(n-3):pick(n+3),par],['Doppeldominant-Tonart',pick(n+2),mode]];
   if(e!==null)rel.push(['Enharmonisch',e,mode]);
   let h=`<section><div class="title"><span class="kname">${kName(n,mode)}</span><span class="sub">${enName(tonic(n,mode))} ${mode==='dur'?'major':'minor'}</span></div>
-  <div class="facts"><div><span>Vorzeichen</span><b>${sigTxt(n)}</b>${sig?`<div class="sub">${sig}</div>`:''}</div>
+  <div class="facts"><div><span>Vorzeichen</span><b style="color:${n>0?'var(--sharp)':n<0?'var(--flat)':'inherit'}">${sigTxt(n)}</b>${sig?`<div class="sub">${sig}</div>`:''}</div>
   <div><span>Paralleltonart</span><b>${kName(n,par)}</b></div><div><span>Leitton</span><b>${nn(lt)}</b></div>
-  <div><span>Dominantseptakkord</span><b>${sym(V7,1)}</b><div class="sub">${V7.n4.map(nn).join(' – ')}</div></div></div>
+  <div><span>Dominant&shy;septakkord</span><b>${sym(V7,1)}</b><div class="sub">${V7.n4.map(nn).join(' ')}</div></div></div>
   <div class="btns"><button class="b pri" data-play="sc">▶ Tonleiter</button><button class="b" data-play="c0">▶ Tonika-Akkord</button><button class="b" data-play="cad">▶ Kadenz</button>${e!==null?`<button class="b" data-go="${e},${mode}">⇄ ${kName(e,mode)}</button>`:''}</div></section>`;
   h+=`<section><div class="top"><h2>Tonleiter</h2>${mode==='moll'?`<div class="seg" role="group" aria-label="Moll-Form">${[['nat','natürlich'],['harm','harmonisch'],['mel','melodisch']].map(([k,l])=>`<button data-var="${k}" aria-pressed="${variant===k}">${l}</button>`).join('')}</div>`:''}</div>
   ${staff(s,n)}<div class="chips">${s.map((x,i)=>`<div class="chip${i?'':' t'}${mode==='moll'&&x.a!==nat[i].a?' alt':''}"><i>${i+1}</i><b>${nn(x)}</b></div>${`<div class="step${steps[i]===1?' h':''}">${['','½','1','1½'][steps[i]]}</div>`}`).join('')}<div class="chip t"><i>8</i><b>${nn(s[0])}</b></div></div>
@@ -182,7 +182,7 @@ function render(){const {n,mode}=st,v=mode==='dur'?'dur':variant,s=scale(n,mode,
   h+=`<section><h2>Leitereigene Akkorde</h2><table class="ct"><thead><tr><th>Stufe</th><th>Dreiklang</th><th>Vierklang</th><th>Töne</th><th>Funktion</th><th></th></tr></thead><tbody>
   ${ch.map((c,i)=>`<tr data-play="c${i}"><td class="r">${c.R}</td><td><b>${sym(c)}</b></td><td>${sym(c,1)}</td><td>${c.n3.map(nn).join(' ')}</td><td title="${fn[i][1]}"><b>${fn[i][0]}</b> <span class="sub">${fn[i][1]}</span></td><td><button class="pl" aria-label="${sym(c)} abspielen">▶</button></td></tr>`).join('')}</tbody></table>
   ${mode==='moll'&&variant==='nat'?`<p class="note">In Moll wird die Dominante meist aus harmonisch Moll gebildet: <b>${sym(chord(har,4))}</b> bzw. <b>${sym(chord(har,4),1)}</b> statt ${sym(ch[4])}.</p>`:''}</section>`;
-  h+=`<section><h2>Typische Akkordfolgen</h2><div class="prog">${PR[mode].map((p,k)=>`<button class="b" data-play="p${k}"><span>▶ ${p[0]} <em>${p[1]}</em></span><span>${p[2].map(d=>{const h=typeof d==='string',c=chord(h?har:nat,parseInt(d));return sym(c,p[3])}).join(' – ')}</span></button>`).join('')}</div></section>`;
+  h+=`<section><h2>Typische Akkordfolgen</h2><div class="prog">${PR[mode].map((p,k)=>`<button class="b" data-play="p${k}"><span>▶ ${p[0]} <em>${p[1]}</em></span><span class="cs">${p[2].map(d=>{const h=typeof d==='string',c=chord(h?har:nat,parseInt(d));return sym(c,p[3])}).join(' – ')}</span></button>`).join('')}</div></section>`;
   h+=`<section><h2>Verwandte Tonarten</h2><div class="btns">${rel.map(([l,k,m])=>`<button class="b" data-go="${k},${m}"><span class="sub">${l}:</span> ${kName(k,m)}</button>`).join('')}</div>
   <p class="note">Benachbarte Tonarten im Zirkel unterscheiden sich nur um ein Vorzeichen – Modulationen dorthin klingen besonders natürlich.</p></section>`;
   h+=`<section><h2>Für transponierende Instrumente</h2><table class="stack"><thead><tr><th>Stimme</th><th>notiert in</th><th>Vorzeichen</th></tr></thead><tbody style="cursor:default">
