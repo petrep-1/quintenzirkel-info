@@ -13,5 +13,5 @@ body{font-family:"Hanken Grotesk",system-ui,sans-serif}
 .site-nav .links a:hover{color:var(--ink);background:var(--soft)}
 .site-nav .links a[aria-current=page]{color:var(--ink);background:var(--soft)}
 .site-nav a:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
-@media(max-width:600px){.site-nav{position:static}.site-nav .in{flex-wrap:wrap;padding-top:8px}.site-nav .brand{width:100%;font-size:15px;color:var(--mute)}.site-nav .links{margin-inline:-9px;width:calc(100% + 18px)}.site-nav .links{gap:0;justify-content:space-between}.site-nav .links a{padding:0 5px;font-size:13px}}
+@media(max-width:600px){.site-nav{position:static}.site-nav .in{flex-wrap:wrap;padding-top:8px}.site-nav .brand{width:100%;font-size:15px;color:var(--mute)}.site-nav .links{margin-inline:-9px;width:calc(100% + 18px)}.site-nav .links{gap:0 2px;flex-wrap:wrap;justify-content:flex-start}.site-nav .links a{padding:0 8px;font-size:14px;min-height:38px}}
 .legal-foot{max-width:1240px;margin:0 auto;padding:12px max(4vw,14px) 28px;font-size:14px}.legal-foot a{color:var(--mute);text-underline-offset:3px}

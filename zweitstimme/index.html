@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Zweitstimmen-Generator</title>
+<link rel="stylesheet" href="../assets/site.css">
+<style>
+/* VOICE: praktisch, wie ein Bleistift-Eintrag des Dirigenten in der Stimme
+   IDEA: ein Notenblatt mit zwei Stimmen – oben die Melodie, darunter die neue Stimme in Rot
+   PICTURE: Notenzeile mit Melodie (schwarz) und Zweitstimme (rot), Tonart-Vorzeichen, Takstrichen
+   COLOUR and TYPE: gemeinsame Seitenfarben, Rot nur für die neue Stimme; Hanken Grotesk
+   LAYOUT: Eingabe links, Ergebnis rechts (wie Transponier-Helfer), darunter Noten, Intervalltabelle, Erklärung */
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "Hanken Grotesk",system-ui,sans-serif;overflow-x:clip}
+.band{padding:clamp(20px,3vw,44px) max(4vw,14px)}
+.wrap{max-width:1240px;margin:0 auto}
+h1{font-size:clamp(32px,4vw,46px);line-height:1.05;margin:0;font-weight:800;letter-spacing:-.02em}
+h2{font-size:21px;margin:0 0 12px;font-weight:800;letter-spacing:-.01em}
+.sub{color:var(--mute);margin:4px 0 0;max-width:66ch}
+header.band{padding-bottom:0}
+.tool{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:20px}
+@media(max-width:860px){.tool{grid-template-columns:minmax(0,1fr)}}
+.panel{background:var(--soft);border-radius:14px;padding:18px}
+label{display:block;font-size:14px;font-weight:600;color:var(--mute);margin:0 0 6px}
+select,textarea,button{font:inherit;font-size:16px;color:var(--ink)}
+select,textarea{width:100%;background:var(--bg);border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;min-height:44px}
+textarea{min-height:104px;resize:vertical;font-size:18px;font-weight:600}
+.row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;margin-top:14px}
+.btn{min-height:44px;border-radius:10px;border:1.5px solid var(--line);background:var(--bg);cursor:pointer;padding:0 14px;font-weight:600}
+.btn:hover{border-color:var(--ink)}
+.btn.pri{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+select:focus-visible,textarea:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg button{min-height:40px;padding:0 12px;border-radius:999px;border:1.5px solid var(--line);background:var(--bg);font-size:15px;font-weight:600;cursor:pointer}
+.seg button[aria-pressed=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.chips button{min-height:36px;font-size:14px;padding:0 12px;border-radius:999px;border:1.5px solid var(--line);background:var(--bg);cursor:pointer}
+.chk{display:flex;align-items:center;gap:8px;min-height:44px;margin-top:6px;font-size:15px;cursor:pointer}
+.chk input{width:20px;height:20px;accent-color:var(--acc)}
+.res{background:var(--ink);color:var(--bg);border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:12px}
+.res .tag{font-size:14px;opacity:.75}
+.lines{font-weight:700;font-size:clamp(22px,3.4vw,32px);line-height:1.35;overflow-wrap:anywhere}
+.lines .m{opacity:.55;font-size:.7em;font-weight:600}
+.lines .v{color:light-dark(#ff9d88,#d4432a)}
+.lines .x{opacity:.45}
+.lines .w{text-decoration:underline wavy;text-underline-offset:5px}
+.meta{font-size:15px;opacity:.85}
+.res .btns{display:flex;flex-wrap:wrap;gap:8px}
+.res .btn{background:transparent;color:var(--bg);border-color:color-mix(in srgb,var(--bg) 40%,transparent)}
+.score{background:var(--soft);border-radius:14px;padding:8px 6px;overflow-x:auto}
+.score svg{display:block;height:auto;color:var(--ink)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:14px;color:var(--mute);margin-top:8px}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:6px;vertical-align:-1px}
+table{width:100%;border-collapse:collapse}
+th,td{text-align:left;padding:10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:14px;color:var(--mute);font-weight:600}
+td.w{font-weight:700;font-size:17px;overflow-wrap:anywhere}
+td small{display:block;color:var(--mute);font-size:13px;font-weight:400}
+tr.me td{background:var(--accbg)}
+tr.pick{cursor:pointer}
+.ref{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,270px),1fr));gap:16px 32px}
+.ref h3{margin:0 0 4px;font-size:17px}.ref p{margin:0;color:var(--mute);font-size:15px}
+@media(max-width:600px){table{font-size:14px}th,td{padding:8px 4px}}
+</style>
+</head>
+<body>
+<nav class="site-nav" aria-label="Seiten"><div class="in"><a class="brand" href="../">Musik-Helfer</a><div class="links"><a href="../">Quintenzirkel</a><a href="../transponieren/">Transponieren</a><a href="./" aria-current="page">Zweitstimme</a><a href="../posaune/">Posaune</a><a href="../stimmgeraet/">Stimmgerät</a></div></div></nav>
+<header class="band"><div class="wrap">
+<h1>Zweitstimmen-Generator</h1>
+<p class="sub">Melodie eingeben, Tonart wählen, Intervall wählen: Die zweite Stimme wird leitereigen gebildet, also mit großen und kleinen Terzen und Sexten genau so, wie sie in der Tonart vorkommen.</p>
+</div></header>
+
+<main>
+<section class="band" style="padding-top:16px"><div class="wrap tool">
+<div class="panel">
+<label for="txt">Melodie (Töne mit Leerzeichen, | für Taktstriche)</label>
+<textarea id="txt" spellcheck="false" autocapitalize="off" autocomplete="off"></textarea>
+<div class="chips" id="chips"></div>
+<div class="row">
+<div><label for="key">Tonart</label><select id="key"></select></div>
+<div><label for="mode">Tongeschlecht</label><select id="mode"><option value="maj">Dur</option><option value="min">Moll (natürlich)</option><option value="harm">Moll (harmonisch, Leitton)</option></select></div>
+</div>
+<button class="btn" id="guess" style="margin-top:10px">Tonart aus der Melodie vorschlagen</button>
+<div style="margin-top:16px"><label>Zweitstimme</label><div class="seg" id="ivs"></div></div>
+<div class="row">
+<div><label for="nota">Schreibweise</label><select id="nota"><option value="de">Deutsch (H, B, Fis, Es)</option><option value="en">Englisch (B, Bb, F#, Eb)</option></select></div>
+<div><label for="clef">Notenschlüssel</label><select id="clef"><option value="t">Violinschlüssel</option><option value="b">Bassschlüssel</option></select></div>
+</div>
+<label class="chk"><input type="checkbox" id="keep"> Vorzeichen der Melodie übernehmen (chromatisch statt leitereigen)</label>
+</div>
+
+<div class="res" aria-live="polite">
+<div class="tag" id="rtag"></div>
+<div class="lines" id="out"></div>
+<div class="meta" id="meta"></div>
+<div class="btns"><button class="btn" id="copy">Zweitstimme kopieren</button><button class="btn" id="play">▶ Beide Stimmen anhören</button></div>
+</div>
+</div></section>
+
+<section class="band" style="padding-top:0"><div class="wrap">
+<h2>In Noten</h2>
+<div class="score"><svg id="score" aria-label="Melodie und Zweitstimme in Noten"></svg></div>
+<div class="legend"><span><i style="background:var(--ink)"></i>Melodie</span><span><i style="background:var(--acc)"></i>Zweitstimme</span><span id="octNote"></span></div>
+</div></section>
+
+<section class="band" style="padding-top:0"><div class="wrap">
+<h2>Alle Intervalle im Vergleich</h2>
+<table><thead><tr><th>Intervall</th><th>Zweitstimme</th></tr></thead><tbody id="all"></tbody></table>
+</div></section>
+
+<section class="band" style="padding-top:0"><div class="wrap">
+<h2>Kurz erklärt</h2>
+<div class="ref">
+<div><h3>Leitereigen</h3><p>Die Zweitstimme bleibt in der Tonart. Eine Terz unter e in C-Dur ist c (große Terz), unter d ist es h (kleine Terz). So klingt es wie im Satz, nicht wie eine verschobene Kopie.</p></div>
+<div><h3>Terz oder Sexte?</h3><p>Terz unter der Melodie ist der Klassiker für die zweite Trompete oder das zweite Flügelhorn. Die Sexte unter klingt weiter und voller, sie ist die Terz eine Oktave tiefer gespiegelt nach oben.</p></div>
+<div><h3>Vorsicht bei Quarte und Quinte</h3><p>Leitereigen entsteht auf einer Stufe ein Tritonus (übermäßige Quarte oder verminderte Quinte). Diese Stellen sind gewellt unterstrichen und sollten von Hand angepasst werden.</p></div>
+<div><h3>Melodie mit Oktavlage</h3><p>Ohne Zahl werden nur die Tonnamen gebildet. Mit Oktave (c4, a3 oder c′, a) stimmen auch Lage und Noten exakt. Ohne Angabe wählt die Notenansicht die naheliegende Lage.</p></div>
+</div>
+</div></section>
+</main>
+<p class="legal-foot"><a href="../datenschutz/">Datenschutz</a></p>
+
+<script>
+{
+const $=id=>document.getElementById(id);
+const store={get(k,d){try{const v=localStorage.getItem('zweit.'+k);return v===null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem('zweit.'+k,JSON.stringify(v))}catch(e){}}};
+const NAT=[0,2,4,5,7,9,11],LE=['C','D','E','F','G','A','B'],LD=['C','D','E','F','G','A','H'];
+const mod=(n,m)=>((n%m)+m)%m;
+const esc=s=>s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+/* keys: [letter, acc, signature (+sharps / -flats)] */
+const KMAJ=[[0,0,0],[4,0,1],[1,0,2],[5,0,3],[2,0,4],[6,0,5],[3,1,6],[0,1,7],[3,0,-1],[6,-1,-2],[2,-1,-3],[5,-1,-4],[1,-1,-5],[4,-1,-6],[0,-1,-7]];
+const KMIN=[[5,0,0],[2,0,1],[6,0,2],[3,1,3],[0,1,4],[4,1,5],[1,1,6],[5,1,7],[1,0,-1],[4,0,-2],[0,0,-3],[3,0,-4],[6,-1,-5],[2,-1,-6],[5,-1,-7]];
+const SH=[3,0,4,1,5,2,6],FL=[6,2,5,1,4,0,3];
+const IVS=[['t-','Terz unter',-2],['s-','Sexte unter',-5],['t+','Terz über',2],['s+','Sexte über',5],['q-','Quarte unter',-3],['f-','Quinte unter',-4],['d-','Dezime unter',-9],['o-','Oktave unter',-7]];
+let iv=store.get('iv','t-');
+
+function nm(n,nota){if(nota==='en')return LE[n.L]+(n.a>0?'#'.repeat(n.a):'b'.repeat(-n.a));
+  const L=n.L,a=n.a;if(L===6&&a===-1)return 'B';if(L===6&&a===-2)return 'Heses';
+  let b=LD[L];if(a<0){if(L===2||L===5)return b+'s'+'es'.repeat(-a-1);return b+'es'.repeat(-a)}return b+'is'.repeat(a)}
+function octStr(n,style){if(n.o==null)return '';if(style==='d')return String(n.o);return ''}
+function fullName(n,nota,style,lc){let s=nm(n,nota);if(lc&&style!=='h')s=s[0].toLowerCase()+s.slice(1);if(n.o==null)return s;
+  if(style==='h'&&nota==='de'){if(n.o<=2){return s+(n.o<2?'₁':'')} s=s.toLowerCase();return s+'′'.repeat(Math.max(0,n.o-3))}
+  return s+n.o}
+function parse(tok,nota){
+  let m,L,a=0,rest;
+  if(nota==='de'){m=/^([A-Ha-h])(.*)$/.exec(tok);if(!m)return null;const U=m[1].toUpperCase();rest=m[2];
+    if(U==='B'){L=6;a=-1;if(/^es/.test(rest)){a=-2;rest=rest.slice(2)}}
+    else if(U==='H'){L=6;if(/^is/.test(rest)){a=1;rest=rest.slice(2);if(/^is/.test(rest)){a=2;rest=rest.slice(2)}}else if(/^eses/.test(rest)){a=-2;rest=rest.slice(4)}}
+    else{L=LD.indexOf(U);
+      if((U==='E'||U==='A')&&/^s(?!s)/.test(rest)){a=-1;rest=rest.slice(1);if(/^es/.test(rest)){a=-2;rest=rest.slice(2)}}
+      else if(/^es/.test(rest)){a=-1;rest=rest.slice(2);if(/^es/.test(rest)){a=-2;rest=rest.slice(2)}}
+      else if(/^is/.test(rest)){a=1;rest=rest.slice(2);if(/^is/.test(rest)){a=2;rest=rest.slice(2)}}}
+    m=[null,m[1]]}
+  else{m=/^([A-Ga-g])(.*)$/.exec(tok);if(!m)return null;L=LE.indexOf(m[1].toUpperCase());rest=m[2];
+    let k=0;while(k++<2){if(/^[#♯]/.test(rest)){a++;rest=rest.slice(1)}else if(/^[b♭]/.test(rest)){a--;rest=rest.slice(1)}else break}}
+  if(nota==='de'){let k=0;while(k++<2){if(/^[#♯]/.test(rest)){a++;rest=rest.slice(1)}else if(/^♭/.test(rest)){a--;rest=rest.slice(1)}else break}}
+  let o=null,style='';
+  if(/^-?\d$/.test(rest)){o=+rest;style='d';rest=''}
+  else if(/^['′’]+$/.test(rest)&&m[1]===m[1].toLowerCase()){o=3+rest.length;style='h';rest=''}
+  else if(/^[₁₂,]+$/.test(rest)&&m[1]===m[1].toUpperCase()){o=2-rest.length;style='h';rest=''}
+  if(rest!=='')return null;
+  return {L,a,o,style,lc:style!=='h'&&m[1]!==m[1].toUpperCase()};
+}
+const keyArr=()=>($('mode').value==='maj'?KMAJ:KMIN);
+function sigAcc(sig){const A=[0,0,0,0,0,0,0];if(sig>0)SH.slice(0,sig).forEach(l=>A[l]=1);if(sig<0)FL.slice(0,-sig).forEach(l=>A[l]=-1);return A}
+function scale(){const k=keyArr()[+$('key').value],A=sigAcc(k[2]);if($('mode').value==='harm'){const l7=mod(k[0]-1,7);A[l7]+=1}return {tonic:k,A,sig:k[2]}}
+function keyName(k,minor,nota){let s=nm({L:k[0],a:k[1]},nota);return minor?(nota==='de'?s.toLowerCase()+'-Moll':s+'-Moll'):s+'-Dur'}
+function fillKeys(){const minor=$('mode').value!=='maj',v=$('key').value,nota=$('nota').value;
+  $('key').innerHTML=keyArr().map((k,i)=>`<option value="${i}">${esc(keyName(k,minor,nota))} (${k[2]===0?'keine Vorzeichen':Math.abs(k[2])+(k[2]>0?' ♯':' ♭')})</option>`).join('');$('key').value=v||'0'}
+
+const IQ={3:{3:'kleine Terz',4:'große Terz'},6:{8:'kleine Sexte',9:'große Sexte'},4:{5:'reine Quarte',6:'übermäßige Quarte',4:'verminderte Quarte'},5:{7:'reine Quinte',6:'verminderte Quinte',8:'übermäßige Quinte'},8:{12:'Oktave'},10:{15:'kleine Dezime',16:'große Dezime'}};
+const abs=n=>(n.o??4)*12+NAT[n.L]+n.a;
+function second(n,steps,sc,keep){const s=(n.o??4)*7+n.L+steps,L=mod(s,7),o=Math.floor(s/7);
+  let a=sc.A[L];if(keep)a+=n.a-sc.A[n.L];
+  const r={L,a,o:n.o==null?null:o,style:n.style,_o:o};
+  const semi=Math.abs(abs({...r,o:o})-abs({...n,o:n.o??4})),gen=Math.abs(steps)+1,q=(IQ[gen]||{})[semi]||'';
+  r.q=q;r.warn=/übermäßig|vermindert/.test(q)||!q;r.chrom=n.a!==sc.A[n.L];return r}
+
+function tokens(txt,nota){return txt.split(/(\s+|\|)/).map(t=>{if(!t)return null;if(/^\s+$/.test(t))return {sp:t};if(t==='|')return {bar:true};const n=parse(t,nota);return n?{n,t}:{raw:t}}).filter(Boolean)}
+/* auto octave for display/sound: nearest to previous note */
+function placeOct(ts,clef){let prev=null;const base=clef==='b'?3:4;
+  ts.forEach(t=>{if(!t.n)return;const n=t.n;if(n.o!=null){t.po=n.o;prev=abs(n);return}
+    const pc=NAT[n.L]+n.a;let best=null;for(let o=1;o<=6;o++){const v=o*12+pc,d=prev==null?Math.abs(v-(base*12+11)):Math.abs(v-prev);if(best==null||d<best[0])best=[d,o]}
+    t.po=best[1];prev=best[1]*12+pc})}
+
+function compute(steps){const nota=$('nota').value,sc=scale(),keep=$('keep').checked,ts=tokens($('txt').value,nota);
+  placeOct(ts,$('clef').value);
+  ts.forEach(t=>{if(t.n){const nn={...t.n,o:t.n.o??t.po};const v=second(nn,steps,sc,keep);t.v={...v,o:t.n.o==null?null:v.o};t.vpo=v._o}});
+  return {ts,sc,nota}}
+
+function render(){
+  const ivd=IVS.find(x=>x[0]===iv);document.querySelectorAll('#ivs button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.k===iv));
+  const {ts,sc,nota}=compute(ivd[2]),minor=$('mode').value!=='maj';
+  const notes=ts.filter(t=>t.n);
+  $('rtag').textContent=`${ivd[1]} in ${keyName(sc.tonic,minor,nota)}`;
+  if(!notes.length){$('out').innerHTML='<span class="x">Keine Töne erkannt. Beispiel: c d e f g | g a g</span>';$('meta').textContent='';$('score').innerHTML='';$('all').innerHTML='';return}
+  const line=(f)=>ts.map(t=>t.sp?' ':t.bar?'| ':t.raw?`<span class="x">${esc(t.raw)}</span>`:f(t)).join('').replace(/ +/g,' ');
+  $('out').innerHTML=`<div class="m">${line(t=>esc(fullName(t.n,nota,t.n.style,t.n.lc)))}</div><div class="v">${line(t=>`<span class="${t.v.warn?'w':''}" title="${esc(t.v.q||'')}">${esc(fullName(t.v,nota,t.n.style,t.n.lc))}</span>`)}</div>`;
+  const qs={};notes.forEach(t=>{qs[t.v.q||'?']=(qs[t.v.q||'?']||0)+1});
+  const warn=notes.filter(t=>t.v.warn).length,chrom=notes.filter(t=>t.v.chrom).length;
+  $('meta').innerHTML=Object.entries(qs).map(([q,c])=>`${c}× ${esc(q)}`).join(' · ')+(warn?` · <b>${warn} Stelle${warn>1?'n':''} prüfen</b> (gewellt)`:'')+(chrom&&!$('keep').checked?` · ${chrom} Ton/Töne außerhalb der Tonart, Zweitstimme leitereigen gebildet`:'');
+  last=line(t=>fullName(t.v,nota,t.n.style,t.n.lc)).replace(/<[^>]+>/g,'').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').trim();
+  drawScore(ts,sc);
+  $('octNote').textContent=notes.some(t=>t.n.o==null)?'Oktavlage für die Noten automatisch gewählt':'';
+  $('all').innerHTML=IVS.map(x=>{const r=compute(x[2]);return `<tr class="pick${x[0]===iv?' me':''}" data-k="${x[0]}"><td><b>${x[1]}</b></td><td class="w">${esc(r.ts.map(t=>t.sp?' ':t.bar?'| ':t.raw?t.raw:fullName(t.v,nota,t.n.style,t.n.lc)).join('').replace(/ +/g,' '))}</td></tr>`}).join('');
+  ['txt','key','mode','nota','clef'].forEach(id=>store.set(id,$(id).value));store.set('keep',$('keep').checked);store.set('iv',iv)}
+let last='';
+
+/* score */
+const ACC={'-2':'♭♭','-1':'♭','0':'♮','1':'♯','2':'𝄪'};
+function drawScore(ts,sc){const clef=$('clef').value,base=clef==='b'?18:30,top=40,bot=top+40,y=s=>bot-(s-base)*5;
+  const sigPos=sc.sig>0?(clef==='b'?[24,21,25,22,19,23,20]:[38,35,39,36,33,37,34]):(clef==='b'?[20,23,19,22,18,21,17]:[34,37,33,36,32,35,31]);
+  const ns=Math.abs(sc.sig);let x=64+ns*11+10;const cols=[];
+  ts.forEach(t=>{if(t.bar){cols.push({bar:1,x:x-6});x+=10;return}if(!t.n)return;cols.push({t,x:x+14});x+=40});
+  const W=Math.max(x+20,320);let minY=top-6,maxY=bot+6,g='';
+  const head=(st,cx,col)=>{const yy=y(st);minY=Math.min(minY,yy-10);maxY=Math.max(maxY,yy+10);let l='';
+    for(let s=base+10;s<=st;s+=2)l+=`<line x1="${cx-12}" x2="${cx+12}" y1="${y(s)}" y2="${y(s)}" stroke="currentColor" stroke-width="1.2"/>`;
+    for(let s=base-2;s>=st;s-=2)l+=`<line x1="${cx-12}" x2="${cx+12}" y1="${y(s)}" y2="${y(s)}" stroke="currentColor" stroke-width="1.2"/>`;
+    return l+`<ellipse cx="${cx}" cy="${yy}" rx="6.6" ry="4.8" fill="${col}" transform="rotate(-20 ${cx} ${yy})"/>`};
+  const accT=(n,cx,yy,col)=>n.a!==sigAcc(sc.sig)[n.L]?`<text x="${cx}" y="${yy+5}" font-size="16" text-anchor="middle" fill="${col}">${ACC[n.a]}</text>`:'';
+  cols.forEach(c=>{if(c.bar){g+=`<line x1="${c.x}" x2="${c.x}" y1="${top}" y2="${bot}" stroke="currentColor" stroke-width="1.4"/>`;return}
+    const t=c.t,ms=t.po*7+t.n.L,vs=t.vpo*7+t.v.L,vcol=t.v.warn?'var(--acc)':'var(--acc)';
+    g+=head(ms,c.x,'currentColor')+head(vs,c.x,vcol);
+    const close=Math.abs(ms-vs)<=1;
+    g+=accT(t.n,c.x-16,y(ms),'currentColor')+accT(t.v,c.x-(close||Math.abs(ms-vs)<5?28:16),y(vs),'var(--acc)');
+    if(t.v.warn)g+=`<text x="${c.x}" y="${Math.max(y(ms),y(vs))+22}" font-size="13" text-anchor="middle" fill="var(--acc)" font-weight="700">!</text>`});
+  let L='';for(let i=0;i<5;i++)L+=`<line x1="6" x2="${W-6}" y1="${top+i*10}" y2="${top+i*10}" stroke="currentColor" stroke-width="1.1" opacity=".75"/>`;
+  const clefSvg=clef==='t'?`<path transform="translate(0 -28.3) scale(.833)" d="M30 148c-7 2-9-8-2-9 6 0 7 9 0 12-6 2-4-5-4-8L32 58c1-12 13-10 9 4-4 14-24 26-24 44 0 18 30 18 30 2 0-12-17-13-18-1-1 8 7 11 10 9" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>`
+    :`<g transform="translate(0 -28.3) scale(.833)"><circle cx="20" cy="94" r="5" fill="currentColor"/><path d="M16 94C14 80 36 76 42 90 48 106 32 124 12 134" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/><circle cx="50" cy="88" r="2.6" fill="currentColor"/><circle cx="50" cy="100" r="2.6" fill="currentColor"/></g>`;
+  let sig='';for(let i=0;i<ns;i++)sig+=`<text x="${62+i*11}" y="${y(sigPos[i])+5}" font-size="17" text-anchor="middle" fill="currentColor">${sc.sig>0?'♯':'♭'}</text>`;
+  minY=Math.min(minY,top-20);maxY=Math.max(maxY,bot+26);
+  const s=$('score');s.setAttribute('viewBox',`0 ${minY} ${W} ${maxY-minY}`);s.setAttribute('width',W*1.25);s.setAttribute('height',(maxY-minY)*1.25);
+  s.innerHTML=L+clefSvg+sig+g+`<line x1="${W-6}" x2="${W-6}" y1="${top}" y2="${bot}" stroke="currentColor" stroke-width="2"/>`}
+
+/* sound */
+let ac=null,timers=[];
+function play(){timers.forEach(clearTimeout);timers=[];try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();if(ac.state==='suspended')ac.resume()}catch(e){return}
+  const ivd=IVS.find(x=>x[0]===iv),{ts}=compute(ivd[2]);let i=0;
+  const tone=(m,t0,d,gv)=>{const o=ac.createOscillator(),g=ac.createGain(),f=ac.createBiquadFilter();o.type='triangle';o.frequency.value=440*2**((m-69)/12);f.type='lowpass';f.frequency.value=2200;
+    g.gain.setValueAtTime(0,t0);g.gain.linearRampToValueAtTime(gv,t0+.03);g.gain.setValueAtTime(gv,t0+d-.08);g.gain.linearRampToValueAtTime(0,t0+d);o.connect(f).connect(g).connect(ac.destination);o.start(t0);o.stop(t0+d+.02)};
+  const t0=ac.currentTime+.05;ts.forEach(t=>{if(!t.n)return;const mm=12+t.po*12+NAT[t.n.L]+t.n.a,vm=12+t.vpo*12+NAT[t.v.L]+t.v.a;tone(mm,t0+i*.45,.42,.16);tone(vm,t0+i*.45,.42,.12);i++})}
+
+/* setup */
+$('ivs').innerHTML=IVS.map(x=>`<button data-k="${x[0]}" aria-pressed="false">${x[1]}</button>`).join('');
+const PRE=[['Alle meine Entchen','c d e f | g g | a a a a | g | a a a a | g | f f f f | e e | g g g g | c','0','maj'],
+ ['Ode an die Freude','e e f g | g f e d | c c d e | e d d','0','maj'],
+ ['Marsch in B','f4 b4 d5 c5 | b4 a4 b4 f4 | g4 a4 b4 c5 | d5 c5 b4','9','maj'],
+ ['Moll-Melodie','a h c d | e d c h | a gis a','0','harm']];
+$('chips').innerHTML=PRE.map((p,i)=>`<button data-i="${i}">${p[0]}</button>`).join('');
+$('mode').value=store.get('mode','maj');$('nota').value=store.get('nota','de');fillKeys();
+$('key').value=store.get('key','0');$('clef').value=store.get('clef','t');$('keep').checked=store.get('keep',false);
+$('txt').value=store.get('txt',PRE[0][1]);
+$('chips').onclick=e=>{const b=e.target.closest('button');if(!b)return;const p=PRE[+b.dataset.i];$('nota').value='de';$('mode').value=p[3];fillKeys();$('key').value=p[2];$('txt').value=p[1];render()};
+$('ivs').onclick=e=>{const b=e.target.closest('button');if(b){iv=b.dataset.k;render()}};
+$('all').onclick=e=>{const r=e.target.closest('tr.pick');if(r){iv=r.dataset.k;render()}};
+$('mode').onchange=()=>{fillKeys();render()};$('nota').onchange=()=>{fillKeys();render()};
+['key','clef','keep'].forEach(id=>$(id).onchange=render);$('txt').oninput=render;
+$('guess').onclick=()=>{const nota=$('nota').value,ns=tokens($('txt').value,nota).filter(t=>t.n).map(t=>t.n);if(!ns.length)return;
+  let best=null;[['maj',KMAJ],['min',KMIN]].forEach(([md,arr])=>arr.forEach((k,i)=>{const A=sigAcc(k[2]);let s=0;
+    ns.forEach(n=>{if(A[n.L]===n.a)s+=3;else if(md==='min'&&n.L===mod(k[0]-1,7)&&n.a===A[n.L]+1)s+=2});
+    const L=ns[ns.length-1],F=ns[0];if(L.L===k[0]&&L.a===k[1])s+=4;if(F.L===k[0]&&F.a===k[1])s+=2;s-=Math.abs(k[2])*.1;
+    if(!best||s>best[0])best=[s,md,i]}));
+  const md=best[1]==='min'&&ns.some(n=>{const k=KMIN[best[2]];return n.L===mod(k[0]-1,7)&&n.a===sigAcc(k[2])[n.L]+1})?'harm':best[1];
+  $('mode').value=md;fillKeys();$('key').value=best[2];render()};
+$('copy').onclick=async()=>{const b=$('copy');try{await navigator.clipboard.writeText(last);b.textContent='Kopiert ✓'}catch(e){b.textContent='Kopieren nicht möglich'}setTimeout(()=>b.textContent='Zweitstimme kopieren',1600)};
+$('play').onclick=play;
+render();
+}
+</script>
+</body>
+</html>
