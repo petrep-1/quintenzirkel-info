@@ -1,3 +1,4 @@
+@font-face{font-family:"Hanken Grotesk";src:url("fonts/hanken-grotesk.woff") format("woff");font-weight:100 900;font-style:normal;font-display:swap}
 /* Gemeinsames Design aller Seiten: Farben, Schrift, Navigation */
 :root{color-scheme:light dark;--bg:light-dark(#ffffff,#121419);--ink:light-dark(#16171b,#ecebe6);--mute:light-dark(#5b5e66,#a2a5ad);
 --line:light-dark(#dcdad4,#2f323a);--soft:light-dark(#f4f3ef,#1b1e24);--acc:light-dark(#d4432a,#ff7d61);--accbg:light-dark(#fbebe7,#3a211b);
@@ -13,3 +14,4 @@ body{font-family:"Hanken Grotesk",system-ui,sans-serif}
 .site-nav .links a[aria-current=page]{color:var(--ink);background:var(--soft)}
 .site-nav a:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
 @media(max-width:600px){.site-nav{position:static}.site-nav .in{flex-wrap:wrap;padding-top:8px}.site-nav .brand{width:100%;font-size:15px;color:var(--mute)}.site-nav .links{margin-inline:-9px;width:calc(100% + 18px)}.site-nav .links{gap:0;justify-content:space-between}.site-nav .links a{padding:0 5px;font-size:13px}}
+.legal-foot{max-width:1240px;margin:0 auto;padding:12px max(4vw,14px) 28px;font-size:14px}.legal-foot a{color:var(--mute);text-underline-offset:3px}

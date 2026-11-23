@@ -1,8 +1,6 @@
 <!DOCTYPE html>
 <html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Quintenzirkel</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/site.css">
 <style>
 /* VOICE: klar, werkstattnah, wie ein gut gestochenes Notenblatt – für Musiker, die schnell nachschlagen
@@ -228,4 +226,5 @@ function fromHash(){if(skip){skip=false;return}const k=ALL[decodeURIComponent(lo
 addEventListener('hashchange',fromHash);MQ.addEventListener?.('change',drawWheel);
 const k0=ALL[location.hash.slice(1)];if(k0)st={n:k0[0],mode:k0[1]};lastP=pOf(st.n);rot=lastP*30;render();
 }
-</script></body></html>
+</script><p class="legal-foot"><a href="datenschutz/">Datenschutz</a></p>
+</body></html>
